@@ -254,6 +254,7 @@ The directories in the package directory are as follows:
     docs/                       => Additional documentation
     examples/hello_world_c      => Example simple Verilog->C++ conversion
     examples/hello_world_sc     => Example simple Verilog->SystemC conversion
+    examples/python             => Example verilog->Python conversion
     examples/tracing_c          => Example Verilog->C++ with tracing
     examples/tracing_sc         => Example Verilog->SystemC with tracing
     examples/cmake_c            => Example building hello_world_c with CMake
