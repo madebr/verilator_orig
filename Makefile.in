@@ -153,6 +153,7 @@ DISTFILES_INC = $(INFOS) .gitignore \
 	examples/*/.*ignore examples/*/Makefile* \
 	examples/*/*.[chv]* examples/*/*.pl \
 	examples/*/CMakeLists.txt \
+	examples/*/*.py \
 	test_*/.*ignore test_*/Makefile* test_*/*.cpp \
 	test_*/*.pl test_*/*.v test_*/*.vc test_*/*.vh \
 	test_regress/*.pl \
@@ -309,7 +310,7 @@ VL_INST_INC_SRCDIR_FILES = \
 
 VL_INST_DATA_SRCDIR_FILES = \
 	examples/*/*.[chv]*  examples/*/Makefile* \
-	examples/*/CMakeLists.txt
+	examples/*/CMakeLists.txt examples/*/*.py \
 
 installbin:
 	$(MKINSTALLDIRS) $(DESTDIR)$(bindir)
@@ -348,6 +349,7 @@ installdata:
 	$(MKINSTALLDIRS) $(DESTDIR)$(pkgdatadir)/examples/cmake_hello_c
 	$(MKINSTALLDIRS) $(DESTDIR)$(pkgdatadir)/examples/cmake_tracing_c
 	$(MKINSTALLDIRS) $(DESTDIR)$(pkgdatadir)/examples/cmake_tracing_sc
+	$(MKINSTALLDIRS) $(DESTDIR)$(pkgdatadir)/examples/python
 	cd $(srcdir) \
 	; for p in $(VL_INST_DATA_SRCDIR_FILES) ; do \
 	  $(INSTALL_DATA) $$p $(DESTDIR)$(pkgdatadir)/$$p; \
@@ -379,6 +381,7 @@ uninstall:
 	-rmdir $(DESTDIR)$(pkgdatadir)/examples/cmake_hello_c
 	-rmdir $(DESTDIR)$(pkgdatadir)/examples/cmake_tracing_c
 	-rmdir $(DESTDIR)$(pkgdatadir)/examples/cmake_tracing_sc
+	-rmdir $(DESTDIR)$(pkgdatadir)/examples/python
 	-rmdir $(DESTDIR)$(pkgdatadir)/examples
 	-rmdir $(DESTDIR)$(pkgdatadir)/cmake
 	-rmdir $(DESTDIR)$(pkgdatadir)

@@ -45,6 +45,7 @@
 #include "V3EmitC.h"
 #include "V3EmitCMake.h"
 #include "V3EmitMk.h"
+#include "V3EmitPy.h"
 #include "V3EmitV.h"
 #include "V3EmitXml.h"
 #include "V3Expand.h"
@@ -554,9 +555,11 @@ void process() {
         V3Stats::statsReport();
     }
 
-    if (!v3Global.opt.lintOnly()
-        && !v3Global.opt.xmlOnly()
-        && !v3Global.opt.dpiHdrOnly()) {
+    if (v3Global.opt.python()) {
+        V3EmitPy::emitpy();
+    }
+
+    if (!v3Global.opt.lintOnly() && !v3Global.opt.xmlOnly()) {
         // Makefile must be after all other emitters
         if (v3Global.opt.cmake()) {
             V3EmitCMake::emit();
