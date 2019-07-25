@@ -277,7 +277,7 @@ detailed descriptions in L</"VERILATION ARGUMENTS"> for more information.
     --cc                        Create C++ output
     --cdc                       Clock domain crossing analysis
     --clk <signal-name>         Mark specified signal as clock
-    --make <make-system-system>       Generate scripts for specified make system
+    --make <make-system>        Generate scripts for specified make system
     --compiler <compiler-name>  Tune for specified C++ compiler
     --converge-limit <loops>    Tune convergence settle time
     --coverage                  Enable all coverage
@@ -563,7 +563,7 @@ If clock signals are assigned to vectors and then later used individually,
 Verilator will attempt to decompose the vector and connect the single-bit
 clock signals directly.  This should be transparent to the user.
 
-=item --make <make-system>
+=item --make I<make-system>
 
 Generates a script for the specified make system.
 
@@ -1873,7 +1873,7 @@ For --make gmake, it creates:
 
 For --make cmake, it creates:
 
-    {prefix}.cmake
+    {prefix}.cmake                      // CMake include script for compiling
 
 For -cc and -sc mode, it also creates:
 
