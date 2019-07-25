@@ -212,6 +212,7 @@ AC_DEFUN([_MY_LDLIBS_CHECK_FLAG],
 
 AC_DEFUN([_MY_LDLIBS_CHECK_OPT],
    [# _MY_LDLIBS_CHECK_OPT(flag) -- Check if linker supports specific options
+    LDLIBS_CHECKED_OPTS+=($2)
     # If it does, append flag to variable
     _MY_LDLIBS_CHECK_FLAG($2)
     if test "$_my_result" = "yes" ; then
@@ -295,12 +296,18 @@ AC_SUBST(CFG_CXXFLAGS_NO_UNUSED)
 # can be run on different computers and compilers.
 AC_SUBST(VERILATE_FLAGS_UNCHECKED, [[${CXX_CHECKED_OPTS[@]}]])
 
+LDLIBS_CHECKED_OPTS=()
+
 # Find multithread linker flags
 _MY_LDLIBS_CHECK_OPT(CFG_LDLIBS_THREADS,-mt)
 _MY_LDLIBS_CHECK_OPT(CFG_LDLIBS_THREADS,-pthread)
 _MY_LDLIBS_CHECK_OPT(CFG_LDLIBS_THREADS,-lpthread)
 _MY_LDLIBS_CHECK_OPT(CFG_LDLIBS_THREADS,-latomic)
 AC_SUBST(CFG_LDLIBS_THREADS)
+
+# Use CXX_CHECKED_OPTS instead of CFG_LDLIBS_THREADS because the configure script and cmake script
+# can be run on different computers and compilers.
+AC_SUBST(VERILATE_THREADS_UNCHECKED, [[${LDLIBS_CHECKED_OPTS[@]}]])
 
 # Set CFG_WITH_THREADED if can support threading
 AC_MSG_CHECKING(whether $CXX supports Verilated threads)

@@ -68,6 +68,14 @@ if(NOT _INDEX EQUAL -1)
     list(REMOVE_AT TEST_VERILATOR_ARGS ${_INDEX})
 endif()
 
+# Remove --threads <nbthreads>
+list(FIND TEST_VERILATOR_ARGS "--threads" _INDEX)
+if(NOT _INDEX EQUAL -1)
+    list(REMOVE_AT TEST_VERILATOR_ARGS ${_INDEX})
+    list(GET TEST_VERILATOR_ARGS ${_INDEX} TEST_THREADS)
+    list(REMOVE_AT TEST_VERILATOR_ARGS ${_INDEX})
+endif()
+
 # Remove -cc
 list(FIND TEST_VERILATOR_ARGS "-cc" _INDEX)
 if(NOT _INDEX EQUAL -1)
@@ -96,6 +104,9 @@ if(TEST_PREFIX)
 endif()
 if(TEST_OPT_FAST)
     list(APPEND verilate_ARGS OPT_FAST ${TEST_OPT_FAST})
+endif()
+if(TEST_THREADS)
+    list(APPEND verilate_ARGS THREADS ${TEST_THREADS})
 endif()
 
 set(TARGET_NAME "V${TEST_NAME}")
