@@ -269,6 +269,7 @@ _MY_CXX_CHECK_OPT(CFG_CXXFLAGS_PARSER,-Wno-unused)
 AC_SUBST(CFG_CXXFLAGS_PARSER)
 
 CXX_CHECKED_OPTS=()
+
 # Flags for Verilated makefile
 # For example, -Wno-div-by-zero isn't in 4.1.2
 # Random code often does / 0.  Unfortunately VL_DIV_I(0,0) will warn
@@ -290,7 +291,9 @@ _MY_CXX_CHECK_OPT(CFG_CXXFLAGS_NO_UNUSED,-Wno-unused-variable)
 _MY_CXX_CHECK_OPT(CFG_CXXFLAGS_NO_UNUSED,-Wno-shadow)
 AC_SUBST(CFG_CXXFLAGS_NO_UNUSED)
 
-AC_SUBST(VERILATE_FLAGS, [[${CXX_CHECKED_OPTS[@]}]])
+# Use CXX_CHECKED_OPTS instead of CFG_CXXFLAGS_NO_UNUSED because the configure script and cmake script
+# can be run on different computers and compilers.
+AC_SUBST(VERILATE_FLAGS_UNCHECKED, [[${CXX_CHECKED_OPTS[@]}]])
 
 # Find multithread linker flags
 _MY_LDLIBS_CHECK_OPT(CFG_LDLIBS_THREADS,-mt)

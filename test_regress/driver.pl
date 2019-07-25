@@ -423,6 +423,7 @@ use Cwd;
 use Data::Dumper;
 use File::Spec;
 use File::Path qw(mkpath);
+use File::Which;
 
 use vars qw($Self $Self);
 use strict;
@@ -919,12 +920,18 @@ sub compile {
             return 1;
         }
 
+        if ($param{verilator_make_cmake} && !$self->have_cmake) {
+            $self->skip("Test requires CMake; ignore error since not available or version too old\n");
+            return 1;
+        }
+
         if (!$param{fails} && $param{make_main}) {
             $self->_make_main();
         }
 
-        if ($param{verilator_make_gmake}) {
+        if ($param{verilator_make_gmake} || (!$param{verilator_make_gmake} && !$param{verilator_make_cmake})) {
             my @vlt_cmd = $self->compile_vlt_cmd(%param);
+            $self->oprint("Running Verilator (gmake)\n") if $self->{verbose};
             $self->_run(logfile=>"$self->{obj_dir}/vlt_compile.log",
                         fails=>$param{fails},
                         tee=>$param{tee},
@@ -936,30 +943,33 @@ sub compile {
 
         if ($param{verilator_make_cmake}) {
             my @vlt_args = $self->compile_vlt_flags(%param);
-            $self->oprint("GCC\n") if $self->{verbose};
+            $self->oprint("Running cmake\n") if $self->{verbose};
             mkdir $self->{obj_dir};
             my @csources = ();
             unshift @csources, $self->{main_filename} if $param{make_main};
             unlink "$self->{obj_dir}/CMakeCache.txt";
-            $self->_run(logfile=>"$self->{obj_dir}/vlt_make_cmake.log",
+            $self->_run(logfile=>"$self->{obj_dir}/vlt_cmake.log",
                         fails=>$param{fails},
                         tee=>$param{tee},
                         expect=>$param{expect},
                         expect_filename=>$param{expect_filename},
-                        cmd=>["cmake",
-                              "-S ".$::RealBin,
-                              "-B ".$self->{obj_dir},
+                        cmd=>["cd \"".$self->{obj_dir}."\" && cmake",
+                              "\"".$self->{t_dir}."/..\"",
                               "-DTEST_VERILATOR_ROOT=$ENV{VERILATOR_ROOT}",
                               "-DTEST_NAME=$self->{name}",
                               "-DTEST_CSOURCES=\"@csources\"",
                               "-DTEST_VERILATOR_ARGS=\"@vlt_args\"",
                               "-DTEST_VERILATOR_SOURCES=\"$param{top_filename} @{$param{v_other_filenames}}\"",
-                        ]) if $::Opt_Verilation;
+                              "-DTEST_VERBOSE=\"$opt_verbose\"",
+                              "-DTEST_OPT_FAST=\"" . ($param{benchmark}?"-O2":"") . "\"",
+                              "-DTEST_VERILATION=\"" . $::Opt_Verilation . "\"",
+                              ($self->{verbose} ? "--verbose" : ""),
+                        ]);
             return 1 if $self->errors || $self->skips || $self->unsupporteds;
         }
 
         if (!$param{fails} && $param{verilator_make_gmake}) {
-            $self->oprint("GCC\n") if $self->{verbose};
+            $self->oprint("Running make (gmake)\n") if $self->{verbose};
             $self->_run(logfile=>"$self->{obj_dir}/vlt_gcc.log",
                         cmd=>["make",
                               "-C ".$self->{obj_dir},
@@ -977,19 +987,10 @@ sub compile {
         }
 
         if (!$param{fails} && $param{verilator_make_cmake}) {
-            $self->oprint("GCC\n") if $self->{verbose};
-            $self->_run(logfile=>"$self->{obj_dir}/vlt_make_cmake.log",
+            $self->oprint("Running cmake --build\n") if $self->{verbose};
+            $self->_run(logfile=>"$self->{obj_dir}/vlt_cmake_build.log",
                         cmd=>["cmake", "--build", $self->{obj_dir},
                         ]);
-                        #     ($self->{verbose} ? "" : "--no-print-directory"),
-                        #     "VM_PREFIX=$self->{VM_PREFIX}",
-                        #     "TEST_OBJ_DIR=$self->{obj_dir}",
-                        #     "CPPFLAGS_DRIVER=-D".uc($self->{name}),
-                        #     ($opt_verbose ? "CPPFLAGS_DRIVER2=-DTEST_VERBOSE=1":""),
-                        #     ($param{make_main}?"":"MAKE_MAIN=0"),
-                        #     ($param{benchmark}?"OPT_FAST=-O2":""),
-                        #     "$self->{VM_PREFIX}",  # bypass default rule, as we don't need archive
-                        #);
         }
     }
     else {
@@ -1228,6 +1229,18 @@ sub have_sc {
     #my $self = shift;
     return 1 if (defined $ENV{SYSTEMC} || defined $ENV{SYSTEMC_INCLUDE});
     return 0;
+}
+
+sub have_cmake {
+    my $cmake_bin = which 'cmake';
+    if (!defined $cmake_bin) {
+        return 0;
+    }
+    my $cmake_version = `$cmake_bin --version`;
+    $cmake_version =~ /cmake version (\d+)\.(\d+)/;
+    my $major = $1;
+    my $minor = $2;
+    return ($major > 3 ) || (($major == 3) && ($minor >= 8));
 }
 
 sub trace_filename {

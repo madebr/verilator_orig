@@ -32,4 +32,4 @@ public:
     static void emit(AstNetlist* nodep);
 };
 
-#endif // Guard
+#endif  // Guard

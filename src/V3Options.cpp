@@ -522,6 +522,19 @@ string V3Options::getenvVERILATOR_ROOT() {
     return var;
 }
 
+
+//######################################################################
+// V3 Options notification methods
+
+void V3Options::notify() {
+    // Notify that all arguments have been passed and final modification can be made.
+
+    // Make sure at least one make system is enabled
+    if (!m_gmake && !m_cmake) {
+        m_gmake = true;
+    }
+}
+
 //######################################################################
 // V3 Options accessors
 
@@ -846,7 +859,7 @@ void V3Options::parseOptsList(FileLine* fl, const string& optdir, int argc, char
                 } else if (!strcmp(argv[i], "gmake")) {
                     m_gmake = true;
                 } else {
-                    fl->v3fatal("Unknown build system specified: " << argv[i]);
+                    fl->v3fatal("Unknown make system specified: '" << argv[i] << "'");
                 }
             }
             else if (!strcmp(sw, "-no-l2name")) {  // Historical and undocumented
@@ -1123,10 +1136,6 @@ void V3Options::parseOptsList(FileLine* fl, const string& optdir, int argc, char
             }
             shift;
         }
-    }
-    // Make sure at least one build system is enabled
-    if (!m_gmake && !m_cmake) {
-        m_gmake = true;
     }
 #undef shift
 }

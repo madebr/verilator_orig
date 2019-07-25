@@ -277,7 +277,7 @@ detailed descriptions in L</"VERILATION ARGUMENTS"> for more information.
     --cc                        Create C++ output
     --cdc                       Clock domain crossing analysis
     --clk <signal-name>         Mark specified signal as clock
-    --make <build-system>       Generate scripts for specified build system
+    --make <make-system-system>       Generate scripts for specified make system
     --compiler <compiler-name>  Tune for specified C++ compiler
     --converge-limit <loops>    Tune convergence settle time
     --coverage                  Enable all coverage
@@ -563,9 +563,12 @@ If clock signals are assigned to vectors and then later used individually,
 Verilator will attempt to decompose the vector and connect the single-bit
 clock signals directly.  This should be transparent to the user.
 
-=item --make <build-system>
+=item --make <make-system>
 
-Generates a script for the specified build system.
+Generates a script for the specified make system.
+
+Supported make systems are gmake and cmake. Both can be specified.
+If no make system is specified, gmake is assumed.
 
 =item --compiler I<compiler-name>
 
@@ -1863,8 +1866,14 @@ All output files are placed in the output directory name specified with the
 
 Verilator creates the following files in the output directory:
 
+For --make gmake, it creates:
+
     {prefix}.mk                         // Make include file for compiling
     {prefix}_classes.mk                 // Make include file with class names
+
+For --make cmake, it creates:
+
+    {prefix}.cmake
 
 For -cc and -sc mode, it also creates:
 
@@ -2326,7 +2335,7 @@ as the build system.
 
 =head2 CMake
 
-Verilator can be run using CMake, which takes care of both running verilator and
+Verilator can be run using CMake, which takes care of both running Verilator and
 compiling the output. There is a CMake example in the examples/ directory. The
 following is a minimal CMakeLists.txt:
 
@@ -2335,7 +2344,7 @@ following is a minimal CMakeLists.txt:
     add_executable(example main.cpp)
     verilate(example SOURCES top.v)
 
-find_package will automatically find an installed copy of verilator, or use a
+find_package will automatically find an installed copy of Verilator, or use a
 local build if VERILATOR_ROOT is set.
 
 It is recommended to use CMake >= 3.12 and the Ninja generator, though other
@@ -2358,12 +2367,12 @@ Or to build with your system default generator:
 
 The package sets the CMake variables verilator_FOUND, VERILATOR_ROOT and
 VERILATOR_BIN to the appropriate values, and also creates a verilate() function.
-verilate() will automatically create custom commands to run verilator and add
+verilate() will automatically create custom commands to run Verilator and add
 the resulting C++ sources to the target specified.
 
     verilate(target SOURCES source ... [TOP_MODULE top] [PREFIX name] [TRACE]
-             [SYSTEMC] [COVERAGE] [INCLUDEDIRS dirs] [SLOW_CFLAGS ...]
-             [FAST_CFLAGS ...] [ARGS ...])
+             [SYSTEMC] [COVERAGE] [INCLUDE_DIRS dirs] [OPT_SLOW ...]
+             [OPT_FAST ...] [ARGS ...])
 
 Lowercase and ... should be replaced with arguments, the uppercase parts delimit
 the arguments and can be passed in any order, or left out entirely if optional.
@@ -2376,11 +2385,11 @@ Name of a target created by add_executable or add_library.
 
 =item SOURCES
 
-List of verilog files to verilate. Must have at least one file.
+List of verilog files to Verilate. Must have at least one file.
 
 =item PREFIX
 
-Optional. Sets the verilator output prefix. Defaults to the name of the first
+Optional. Sets the Verilator output prefix. Defaults to the name of the first
 hdl source with a "V" prepended. Must be unique in each call to verilate(),
 so this is necessary if you build a module multiple times with
 different parameters.
@@ -2402,22 +2411,22 @@ Optional. Enables SystemC mode, defaults to C++ if not specified.
 
 Optional. Enables coverage if present, equivalent to "ARGS --coverage ...".
 
-=item INCLUDEDIRS
+=item INCLUDE_DIRS
 
-Optional. Sets directories that verilator searches (same as -y).
+Optional. Sets directories that Verilator searches (same as -y).
 
-=item SLOW_CFLAGS
+=item OPT_SLOW
 
 Optional. Set compiler flags for the slow path. You may want to reduce the
 optimisation level to improve compile times with large designs.
 
-=item FAST_CFLAGS
+=item OPT_FAST
 
 Optional. Set compiler flags for the fast path.
 
 =item ARGS
 
-Optional. Extra arguments to verilator.
+Optional. Extra arguments to Verilator.
 
 =back
 

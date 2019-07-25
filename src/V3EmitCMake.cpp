@@ -35,18 +35,17 @@
 
 #include <memory>
 
-// Concatenate all strings in 'strs' with 'joint' between them.
+// Concatenate all strings in 'strs' with ' ' between them.
 template<typename List>
-static string cmake_list(const List& strs, const string& joint=" ") {
+static string cmake_list(const List& strs) {
     string s;
     if (strs.begin() != strs.end()) {
         s.append("\"");
         s.append(*strs.begin());
         s.append("\"");
-        for (typename List::const_iterator i = ++strs.begin(); i != strs.end(); i++) {
-            s.append(joint);
-            s.append("\"");
-            s.append(*i);
+        for (typename List::const_iterator it = ++strs.begin(); it != strs.end(); ++it) {
+            s.append(" \"");
+            s.append(*it);
             s.append("\"");
         }
     }
@@ -61,7 +60,7 @@ static void cmake_set_raw(std::ofstream& of, const string& name, const string& r
                         const string& cache_type = "", const string& docstring = "") {
     of << "set(" << name << " " << raw_value;
     if (!cache_type.empty()) {
-        of << " CACHE " << cache_type << " " << docstring;
+        of << " CACHE " << cache_type << " \"" << docstring << "\"";
     }
     of << ")\n";
 }
@@ -73,25 +72,26 @@ static void cmake_set(std::ofstream& of, const string& name, const string& value
 }
 
 //Swap all backslashes for forward slashes, because of Windows
-static string normalize(string s) {
-    for (string::iterator i = s.begin(); i != s.end(); i++) {
-        if (*i == '\\')
-            *i = '/';
+static string deslash(const string& s) {
+    std::string res = s;
+    for (string::iterator it = res.begin(); it != res.end(); ++it) {
+        if (*it == '\\')
+            *it = '/';
     }
-    return s;
+    return res;
 }
 
 void V3EmitCMake::emit(AstNetlist* nodep) {
-    const vl_unique_ptr<std::ofstream> of (V3File::new_ofstream(v3Global.opt.makeDir()+"/"+ v3Global.opt.prefix() + ".cmake.gen"));
+    const vl_unique_ptr<std::ofstream> of (V3File::new_ofstream(v3Global.opt.makeDir()+"/"+ v3Global.opt.prefix() + ".cmake"));
     UINFO(2,__FUNCTION__<<": "<<endl);
     string name = v3Global.opt.prefix();
     *of << "# List generated files for CMake\n";
 
     *of << "\n### Constants...\n";
-    cmake_set(*of, "PERL", normalize(V3Options::getenvPERL()), "FILEPATH", "\"Perl executable (from $PERL)\"");
-    cmake_set(*of, "VERILATOR_ROOT", normalize(V3Options::getenvVERILATOR_ROOT()), "PATH" ,"\"Path to Verilator kit (from $VERILATOR_ROOT)\"");
-    cmake_set(*of, "SYSTEMC_INCLUDE", normalize(V3Options::getenvSYSTEMC_INCLUDE()), "PATH", "\"SystemC include directory with systemc.h (from $SYSTEMC_INCLUDE)\"");
-    cmake_set(*of, "SYSTEMC_LIBDIR", normalize(V3Options::getenvSYSTEMC_LIBDIR()), "PATH", "\"SystemC library directory with libsystemc.a (from $SYSTEMC_LIBDIR)\"");
+    cmake_set(*of, "PERL", deslash(V3Options::getenvPERL()), "FILEPATH", "Perl executable (from $PERL)");
+    cmake_set(*of, "VERILATOR_ROOT", deslash(V3Options::getenvVERILATOR_ROOT()), "PATH" ,"Path to Verilator kit (from $VERILATOR_ROOT)");
+    cmake_set(*of, "SYSTEMC_INCLUDE", deslash(V3Options::getenvSYSTEMC_INCLUDE()), "PATH", "SystemC include directory with systemc.h (from $SYSTEMC_INCLUDE)");
+    cmake_set(*of, "SYSTEMC_LIBDIR", deslash(V3Options::getenvSYSTEMC_LIBDIR()), "PATH", "SystemC library directory with libsystemc.a (from $SYSTEMC_LIBDIR)");
 
     *of << "\n### Switches...\n";
     *of << "# SystemC output mode?  0/1 (from --sc)\n";
@@ -159,19 +159,19 @@ void V3EmitCMake::emit(AstNetlist* nodep) {
     }
 
     *of << "# Global classes, need linked once per executable\n";
-    cmake_set_raw(*of, name + "_GLOBAL", normalize(cmake_list(global)));
+    cmake_set_raw(*of, name + "_GLOBAL", deslash(cmake_list(global)));
     *of << "# Generated module classes, non-fast-path, compile with low/medium optimization\n";
-    cmake_set_raw(*of, name + "_CLASSES_SLOW", normalize(cmake_list(classes_slow)));
+    cmake_set_raw(*of, name + "_CLASSES_SLOW", deslash(cmake_list(classes_slow)));
     *of << "# Generated module classes, fast-path, compile with highest optimization\n";
-    cmake_set_raw(*of, name + "_CLASSES_FAST", normalize(cmake_list(classes_fast)));
+    cmake_set_raw(*of, name + "_CLASSES_FAST", deslash(cmake_list(classes_fast)));
     *of << "# Generated support classes, non-fast-path, compile with low/medium optimization\n";
-    cmake_set_raw(*of, name + "_SUPPORT_SLOW", normalize(cmake_list(support_slow)));
+    cmake_set_raw(*of, name + "_SUPPORT_SLOW", deslash(cmake_list(support_slow)));
     *of << "# Generated support classes, fast-path, compile with highest optimization\n";
-    cmake_set_raw(*of, name + "_SUPPORT_FAST", normalize(cmake_list(support_fast)));
+    cmake_set_raw(*of, name + "_SUPPORT_FAST", deslash(cmake_list(support_fast)));
 
     *of << "# All dependencies\n";
-    cmake_set_raw(*of, name + "_DEPS", normalize(cmake_list(V3File::getAllDeps())));
+    cmake_set_raw(*of, name + "_DEPS", deslash(cmake_list(V3File::getAllDeps())));
 
     *of << "# User .cpp files (from .cpp's on Verilator command line)\n";
-    cmake_set_raw(*of, name + "_USER_CLASSES", normalize(cmake_list(v3Global.opt.cppFiles())));
+    cmake_set_raw(*of, name + "_USER_CLASSES", deslash(cmake_list(v3Global.opt.cppFiles())));
 }

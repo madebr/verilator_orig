@@ -1,3 +1,23 @@
+######################################################################
+#
+# DESCRIPTION: CMake configuration file for Verilator
+#
+# Include it in your CMakeLists.txt using:
+#
+#     find_package(verilate)
+#
+#  This script adds a verilate function.
+#
+#     add_executable(simulator <your-c-sources>)
+#     verilate(simulator SOURCES <your-hdl-sources>)
+#
+# Copyright 2003-2019 by Wilson Snyder. This program is free software; you can
+# redistribute it and/or modify it under the terms of either the GNU
+# Lesser General Public License Version 3 or the Perl Artistic License
+# Version 2.0.
+#
+######################################################################
+
 cmake_minimum_required(VERSION 3.8)
 
 #Prefer VERILATOR_ROOT from environment
@@ -7,7 +27,9 @@ endif()
 
 set(VERILATOR_ROOT "${CMAKE_CURRENT_LIST_DIR}" CACHE PATH "VERILATOR_ROOT")
 
-find_file(VERILATOR_BIN NAMES verilator_bin verilator_bin.exe HINTS ${VERILATOR_ROOT}/bin NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH)
+find_program(VERILATOR_BIN NAMES verilator_bin verilator_bin.exe
+    HINTS ${VERILATOR_ROOT}/bin ENV VERILATOR_ROOT
+    NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH)
 
 if (NOT VERILATOR_ROOT)
     message(FATAL_ERROR "VERILATOR_ROOT cannot be detected. Set it to the appropriate directory (e.g. /usr/share/verilator) as an environment variable or CMake define.")
@@ -19,10 +41,10 @@ endif()
 
 set(verilator_FOUND 1)
 
-#Check flag support. Skip on MSVC, these are all GCC flags.
+# Check flag support. Skip on MSVC, these are all GCC flags.
 if (NOT (DEFINED VERILATOR_CFLAGS OR CMAKE_CXX_COMPILER_ID MATCHES MSVC))
     include(CheckCXXCompilerFlag)
-    foreach (FLAG @VERILATE_FLAGS@)
+    foreach (FLAG @VERILATE_FLAGS_UNCHECKED@)
         string(MAKE_C_IDENTIFIER ${FLAG} FLAGNAME)
         check_cxx_compiler_flag(${FLAG} ${FLAGNAME})
         if (${FLAGNAME})
@@ -56,7 +78,7 @@ define_property(TARGET
 )
 
 function(verilate TARGET)
-    cmake_parse_arguments(VERILATE "MAIN;COVERAGE;TRACE;SYSTEMC" "PREFIX;TOP_MODULE" "SOURCES;VERILATOR_ARGS;INCLUDE_DIRS;SLOW_FLAGS;FAST_FLAGS" ${ARGN})
+    cmake_parse_arguments(VERILATE "MAIN;COVERAGE;TRACE;SYSTEMC" "PREFIX;TOP_MODULE" "SOURCES;VERILATOR_ARGS;INCLUDE_DIRS;OPT_SLOW;OPT_FAST" ${ARGN})
     if (NOT VERILATE_SOURCES)
         message(FATAL_ERROR "Need at least one source")
     endif()
@@ -68,7 +90,7 @@ function(verilate TARGET)
     endif()
 
     if (VERILATE_TOP_MODULE)
-        list(APPEND VERILATE_TOP_MODULE --top-module ${VERILATE_TOP_MODULE})
+        list(APPEND VERILATOR_ARGS --top-module ${VERILATE_TOP_MODULE})
     endif()
 
     if (VERILATE_COVERAGE)
@@ -101,11 +123,11 @@ function(verilate TARGET)
     set(DIR "${CMAKE_CURRENT_BINARY_DIR}/${VERILATE_PREFIX}.dir")
     file(MAKE_DIRECTORY ${DIR})
 
-    set(VERILATOR_COMMAND "${VERILATOR_BIN}" -Wall -Wno-fatal --compiler ${COMPILER} --top-module ${VERILATE_TOP_MODULE} --prefix ${VERILATE_PREFIX} --Mdir ${DIR} --make cmake ${VERILATOR_ARGS} ${VERILATE_VERILATOR_ARGS} ${VERILATE_SOURCES})
+    set(VERILATOR_COMMAND "${VERILATOR_BIN}" -Wall -Wno-fatal --compiler ${COMPILER} --prefix ${VERILATE_PREFIX} --Mdir ${DIR} --make cmake ${VERILATOR_ARGS} ${VERILATE_VERILATOR_ARGS} ${VERILATE_SOURCES})
 
     set(VCMAKE ${DIR}/${VERILATE_PREFIX}.cmake)
+    set(VCMAKE_COPY ${DIR}/${VERILATE_PREFIX}_copy.cmake)
     if (NOT EXISTS ${VCMAKE})
-        message(VERBOSE "Verilator command: \"${VERILATOR_COMMAND_READABLE}\"")
         execute_process(
             COMMAND ${VERILATOR_COMMAND}
             WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -113,23 +135,26 @@ function(verilate TARGET)
             OUTPUT_VARIABLE _VERILATOR_OUTPUT
             ERROR_VARIABLE _VERILATOR_OUTPUT)
         if (_VERILATOR_RC)
-            message("Output:\n${_VERILATOR_OUTPUT}")
             string(REPLACE ";" " " VERILATOR_COMMAND_READABLE "${VERILATOR_COMMAND}")
+            message("Verilator command: \"${VERILATOR_COMMAND_READABLE}\"")
+            message("Output:\n${_VERILATOR_OUTPUT}")
             message(FATAL_ERROR "Verilator command failed (return code=${_VERILATOR_RC})")
         endif()
-        execute_process(COMMAND "${CMAKE_COMMAND}" -E copy "${VCMAKE}.gen" "${VCMAKE}")
+        execute_process(COMMAND "${CMAKE_COMMAND}" -E copy "${VCMAKE}" "${VCMAKE_COPY}")
     endif()
 
-    include(${VCMAKE})
+    include(${VCMAKE_COPY})
 
-    add_custom_command(OUTPUT ${OUTPUTS} ${VCMAKE}.gen ${${VERILATE_PREFIX}_CLASSES_SLOW} ${${VERILATE_PREFIX}_SUPPORT_SLOW} ${${VERILATE_PREFIX}_CLASSES_FAST} ${${VERILATE_PREFIX}_SUPPORT_FAST}
+    set(OUTPUTS ${${VERILATE_PREFIX}_CLASSES_FAST} ${${VERILATE_PREFIX}_CLASSES_SLOW} ${${VERILATE_PREFIX}_SUPPORT_FAST} ${${VERILATE_PREFIX}_SUPPORT_SLOW})
+
+    add_custom_command(OUTPUT ${OUTPUTS} ${VCMAKE}
                        COMMAND ${VERILATOR_COMMAND}
                        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
                        DEPENDS ${${VERILATE_PREFIX}_DEPS} VERBATIM)
     # Reconfigure if file list has changed (check contents rather than modified time to avoid unnecessary reconfiguration)
-    add_custom_command(OUTPUT ${VCMAKE}
-                       COMMAND ${CMAKE_COMMAND} -E copy_if_different "${VCMAKE}.gen" "${VCMAKE}"
-                       DEPENDS ${VCMAKE}.gen)
+    add_custom_command(OUTPUT ${VCMAKE_COPY}
+                       COMMAND ${CMAKE_COMMAND} -E copy_if_different "${VCMAKE}" "${VCMAKE_COPY}"
+                       DEPENDS ${VCMAKE})
 
     if (${VERILATE_PREFIX}_COVERAGE)
         #If any verilate() call specifies --coverage, define VM_COVERAGE in the final build
@@ -155,14 +180,12 @@ function(verilate TARGET)
     endif()
     get_property(_PROP TARGET ${TARGET} PROPERTY VERILATOR_THREADED SET)
 
-    set(OUTPUTS ${${VERILATE_PREFIX}_CLASSES_FAST} ${${VERILATE_PREFIX}_CLASSES_SLOW} ${${VERILATE_PREFIX}_SUPPORT_FAST} ${${VERILATE_PREFIX}_SUPPORT_SLOW})
-
     target_sources(${TARGET} PRIVATE ${OUTPUTS} ${${VERILATE_PREFIX}_GLOBAL})
     target_include_directories(${TARGET} PRIVATE ${VERILATOR_ROOT}/include ${VERILATOR_ROOT}/include/vltstd "${DIR}")
     target_compile_definitions(${TARGET} PRIVATE VL_PRINTF=printf
         VM_COVERAGE=$<BOOL:$<TARGET_PROPERTY:VERILATOR_COVERAGE>>  VM_SC=$<BOOL:$<TARGET_PROPERTY:VERILATOR_SYSTEMC>>
         VM_TRACE=$<BOOL:$<TARGET_PROPERTY:VERILATOR_TRACE>> $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_THREADED>>:VL_THREADED>)
     target_compile_options(${TARGET} PRIVATE ${VERILATOR_CFLAGS} ${VM_USER_CFLAGS})
-    set_source_files_properties(${${VERILATE_PREFIX}_CLASSES_SLOW} ${${VERILATE_PREFIX}_SUPPORT_SLOW} PROPERTIES COMPILE_FLAGS "${VERILATE_SLOW_FLAGS}")
-    set_source_files_properties(${${VERILATE_PREFIX}_CLASSES_FAST} ${${VERILATE_PREFIX}_SUPPORT_FAST} PROPERTIES COMPILE_FLAGS "${VERILATE_FAST_FLAGS}")
+    set_source_files_properties(${${VERILATE_PREFIX}_CLASSES_SLOW} ${${VERILATE_PREFIX}_SUPPORT_SLOW} PROPERTIES COMPILE_FLAGS "${VERILATE_OPT_SLOW}")
+    set_source_files_properties(${${VERILATE_PREFIX}_CLASSES_FAST} ${${VERILATE_PREFIX}_SUPPORT_FAST} PROPERTIES COMPILE_FLAGS "${VERILATE_OPT_FAST}")
 endfunction()
