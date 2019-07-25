@@ -127,7 +127,7 @@ public:
         // Generate the makefile
         V3OutMkFile of (v3Global.opt.makeDir()+"/"+v3Global.opt.prefix()+".mk");
         of.putsHeader();
-        of.puts("# DESCR" "IPTION: Verilator output: Makefile for building Verilated archive or executable\n");
+        of.puts("# DESCRIPTION: Verilator output: Makefile for building Verilated archive or executable\n");
         of.puts("#\n");
         of.puts("# Execute this makefile from the object directory:\n");
         of.puts("#    make -f "+v3Global.opt.prefix()+".mk"+"\n");
