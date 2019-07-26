@@ -13,6 +13,7 @@ use Data::Dumper; $Data::Dumper::Sortkeys=1;
 use FindBin qw($RealBin);
 use strict;
 use vars qw($Debug %Vars $Driver $Fork);
+use version;
 use POSIX qw(strftime);
 use lib ".";
 
@@ -1232,15 +1233,19 @@ sub have_sc {
 }
 
 sub have_cmake {
+    return cmake_version() >= version->declare("3.8");
+}
+
+sub cmake_version {
     my $cmake_bin = which 'cmake';
     if (!defined $cmake_bin) {
-        return 0;
+        return;
     }
     my $cmake_version = `$cmake_bin --version`;
     $cmake_version =~ /cmake version (\d+)\.(\d+)/;
-    my $major = $1;
-    my $minor = $2;
-    return ($major > 3 ) || (($major == 3) && ($minor >= 8));
+    $cmake_version = "$1.$2";
+    print "cmake_version is $cmake_version\n";
+    return version->declare($cmake_version);
 }
 
 sub trace_filename {
