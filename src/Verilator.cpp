@@ -562,7 +562,7 @@ void process() {
             V3EmitCMake::emit();
         }
         if (v3Global.opt.gmake()) {
-            V3EmitMk::emitmk(v3Global.rootp());
+            V3EmitMk::emitmk();
         }
     }
 

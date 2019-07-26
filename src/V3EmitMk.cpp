@@ -26,16 +26,10 @@
 #include "V3EmitMk.h"
 #include "V3EmitCBase.h"
 
-#include <algorithm>
-#include <cmath>
-#include <cstdarg>
-#include <map>
-#include <vector>
-
 //######################################################################
 // Emit statements and math operators
 
-class EmitMkVisitor : public EmitCBaseVisitor {
+class EmitMk {
 public:
 
     // METHODS
@@ -49,7 +43,7 @@ public:
         // Generate the makefile
         V3OutMkFile of (v3Global.opt.makeDir()+"/"+v3Global.opt.prefix()+"_classes.mk");
         of.putsHeader();
-        of.puts("# DESCR" "IPTION: Verilator output: Make include file with class lists\n");
+        of.puts("# DESCRIPTION: Verilator output: Make include file with class lists\n");
         of.puts("#\n");
         of.puts("# This file lists generated Verilated files, for including in higher level makefiles.\n");
         of.puts("# See "+v3Global.opt.prefix()+".mk"+" for the caller.\n");
@@ -227,23 +221,18 @@ public:
         of.putsHeader();
     }
 
-    //--------------------
-    virtual void visit(AstNode* nodep) {  // LCOV_EXCL_LINE
-        nodep->v3fatalSrc("No visitors implemented.");
-    }
-
 public:
-    explicit EmitMkVisitor(AstNetlist*) {
+    explicit EmitMk() {
         emitClassMake();
         emitOverallMake();
     }
-    virtual ~EmitMkVisitor() {}
+    virtual ~EmitMk() {}
 };
 
 //######################################################################
 // Gate class functions
 
-void V3EmitMk::emitmk(AstNetlist* nodep) {
+void V3EmitMk::emitmk() {
     UINFO(2,__FUNCTION__<<": "<<endl);
-    EmitMkVisitor visitor (nodep);
+    EmitMk emitter;
 }
