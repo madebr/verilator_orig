@@ -59,7 +59,7 @@ run:
 	@echo
 	@echo "-- CMake ----------------"
 	rm -rf build && mkdir build
-	cmake -S . -B build
+	cd build && cmake ..
 
 	@echo
 	@echo "-- COMPILE -----------------"
