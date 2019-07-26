@@ -183,7 +183,6 @@ AC_DEFUN([_MY_CXX_CHECK_SET],
 
 AC_DEFUN([_MY_CXX_CHECK_OPT],
    [# _MY_CXX_CHECK_OPT(flag) -- Check if compiler supports specific options
-    CXX_CHECKED_OPTS+=($2)
     # If it does, append flag to variable
     _MY_CXX_CHECK_FLAG($2)
     if test "$_my_result" = "yes" ; then
@@ -212,7 +211,6 @@ AC_DEFUN([_MY_LDLIBS_CHECK_FLAG],
 
 AC_DEFUN([_MY_LDLIBS_CHECK_OPT],
    [# _MY_LDLIBS_CHECK_OPT(flag) -- Check if linker supports specific options
-    LDLIBS_CHECKED_OPTS+=($2)
     # If it does, append flag to variable
     _MY_LDLIBS_CHECK_FLAG($2)
     if test "$_my_result" = "yes" ; then
@@ -269,8 +267,6 @@ _MY_CXX_CHECK_OPT(CFG_CXXFLAGS_PARSER,-Wno-parentheses-equality)
 _MY_CXX_CHECK_OPT(CFG_CXXFLAGS_PARSER,-Wno-unused)
 AC_SUBST(CFG_CXXFLAGS_PARSER)
 
-CXX_CHECKED_OPTS=()
-
 # Flags for Verilated makefile
 # For example, -Wno-div-by-zero isn't in 4.1.2
 # Random code often does / 0.  Unfortunately VL_DIV_I(0,0) will warn
@@ -280,34 +276,35 @@ CXX_CHECKED_OPTS=()
 # For some reason -faligned-new does not work under Travis w/ clang but the
 # configure test doesn't catch this either
 AS_IF([test "x$TRAVIS_COMPILER" != xclang], [_MY_CXX_CHECK_OPT(CFG_CXXFLAGS_NO_UNUSED,-faligned-new)])
-_MY_CXX_CHECK_OPT(CFG_CXXFLAGS_NO_UNUSED,-fbracket-depth=4096)
-_MY_CXX_CHECK_OPT(CFG_CXXFLAGS_NO_UNUSED,-Qunused-arguments)
-_MY_CXX_CHECK_OPT(CFG_CXXFLAGS_NO_UNUSED,-Wno-bool-operation)
-_MY_CXX_CHECK_OPT(CFG_CXXFLAGS_NO_UNUSED,-Wno-parentheses-equality)
-_MY_CXX_CHECK_OPT(CFG_CXXFLAGS_NO_UNUSED,-Wno-sign-compare)
-_MY_CXX_CHECK_OPT(CFG_CXXFLAGS_NO_UNUSED,-Wno-uninitialized)
-_MY_CXX_CHECK_OPT(CFG_CXXFLAGS_NO_UNUSED,-Wno-unused-but-set-variable)
-_MY_CXX_CHECK_OPT(CFG_CXXFLAGS_NO_UNUSED,-Wno-unused-parameter)
-_MY_CXX_CHECK_OPT(CFG_CXXFLAGS_NO_UNUSED,-Wno-unused-variable)
-_MY_CXX_CHECK_OPT(CFG_CXXFLAGS_NO_UNUSED,-Wno-shadow)
+CFG_CXX_FLAGS_CMAKE="-faligned-new"
+m4_foreach([cflag],[
+        [-fbracket-depth=4096],
+        [-Qunused-arguments],
+        [-Wno-bool-operation],
+        [-Wno-parentheses-equality],
+        [-Wno-sign-compare],
+        [-Wno-uninitialized],
+        [-Wno-unused-but-set-variable],
+        [-Wno-unused-parameter],
+        [-Wno-unused-variable],
+        [-Wno-shadow]],[
+    _MY_CXX_CHECK_OPT(CFG_CXXFLAGS_NO_UNUSED,cflag)
+    CFG_CXX_FLAGS_CMAKE="$CFG_CXX_FLAGS_CMAKE cflag"
+    ])
 AC_SUBST(CFG_CXXFLAGS_NO_UNUSED)
-
-# Use CXX_CHECKED_OPTS instead of CFG_CXXFLAGS_NO_UNUSED because the configure script and cmake script
-# can be run on different computers and compilers.
-AC_SUBST(VERILATE_FLAGS_UNCHECKED, [[${CXX_CHECKED_OPTS[@]}]])
-
-LDLIBS_CHECKED_OPTS=()
+AC_SUBST(CFG_CXX_FLAGS_CMAKE)
 
 # Find multithread linker flags
-_MY_LDLIBS_CHECK_OPT(CFG_LDLIBS_THREADS,-mt)
-_MY_LDLIBS_CHECK_OPT(CFG_LDLIBS_THREADS,-pthread)
-_MY_LDLIBS_CHECK_OPT(CFG_LDLIBS_THREADS,-lpthread)
-_MY_LDLIBS_CHECK_OPT(CFG_LDLIBS_THREADS,-latomic)
+m4_foreach([ldflag], [
+        [-mt],
+        [-pthread],
+        [-lpthread],
+        [-latomic]],[
+    _MY_LDLIBS_CHECK_OPT(CFG_LDLIBS_THREADS,ldflag)
+    CFG_LDFLAGS_THREADS_CMAKE="$CFG_LDFLAGS_THREADS_CMAKE ldflag"
+    ])
 AC_SUBST(CFG_LDLIBS_THREADS)
-
-# Use LDLIBS_CHECKED_OPTS instead of CFG_LDLIBS_THREADS because the configure script and cmake script
-# can be run on different computers and compilers.
-AC_SUBST(VERILATE_THREADS_UNCHECKED, [[${LDLIBS_CHECKED_OPTS[@]}]])
+AC_SUBST(CFG_LDFLAGS_THREADS_CMAKE)
 
 # Set CFG_WITH_THREADED if can support threading
 AC_MSG_CHECKING(whether $CXX supports Verilated threads)
