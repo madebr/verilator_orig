@@ -385,7 +385,7 @@ uninstall:
 	-rmdir $(DESTDIR)$(pkgdatadir)
 	-rmdir $(DESTDIR)$(pkgconfigdir)
 
-install: all_nomsg install-all
+install: install-all
 install-all: installbin installman installdata install-msg
 
 install-here: installman ftp
