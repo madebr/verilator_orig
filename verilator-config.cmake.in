@@ -41,10 +41,10 @@ endif()
 
 set(verilator_FOUND 1)
 
+include(CheckCXXSourceCompiles)
 macro(_verilator_check_cxx_libraries LIBRARIES RESVAR)
     # Check whether a particular link option creates a valid executable
     set(_VERILATOR_CHECK_CXX_LINK_OPTIONS_SRC "int main() {return 0;}\n")
-    include(CheckCXXSourceCompiles)
     set(CMAKE_REQUIRED_FLAGS)
     set(CMAKE_REQUIRED_DEFINITIONS)
     set(CMAKE_REQUIRED_INCLUDES)
