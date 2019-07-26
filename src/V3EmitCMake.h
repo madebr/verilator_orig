@@ -20,16 +20,15 @@
 
 #ifndef _V3EMITCMAKE_H_
 #define _V3EMITCMAKE_H_ 1
+
 #include "config_build.h"
 #include "verilatedos.h"
-#include "V3Error.h"
-#include "V3Ast.h"
 
 //============================================================================
 
 class V3EmitCMake {
 public:
-    static void emit(AstNetlist* nodep);
+    static void emit();
 };
 
 #endif  // Guard
