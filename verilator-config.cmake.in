@@ -171,7 +171,12 @@ function(verilate TARGET)
 
     include("${VCMAKE_COPY}")
 
-    set(OUTPUTS ${${VERILATE_PREFIX}_CLASSES_FAST} ${${VERILATE_PREFIX}_CLASSES_SLOW} ${${VERILATE_PREFIX}_SUPPORT_FAST} ${${VERILATE_PREFIX}_SUPPORT_SLOW})
+    set(C_OUTPUTS ${${VERILATE_PREFIX}_CLASSES_FAST} ${${VERILATE_PREFIX}_CLASSES_SLOW} ${${VERILATE_PREFIX}_SUPPORT_FAST} ${${VERILATE_PREFIX}_SUPPORT_SLOW})
+    foreach(C_OUTPUT ${C_OUTPUTS})
+        get_filename_component(C_OUTPUT_NAME_WE "${C_OUTPUT}" NAME_WE)
+        list(APPEND H_OUTPUTS "${VDIR}/${C_OUTPUT_NAME_WE}.h")
+    endforeach()
+    set(OUTPUTS ${C_OUTPUTS} ${H_OUTPUTS})
 
     add_custom_command(OUTPUT ${OUTPUTS} ${VCMAKE}
                        COMMAND ${VERILATOR_COMMAND}
@@ -207,12 +212,16 @@ function(verilate TARGET)
     get_property(_PROP TARGET ${TARGET} PROPERTY VERILATOR_THREADED SET)
 
     target_sources(${TARGET} PRIVATE ${OUTPUTS} ${${VERILATE_PREFIX}_GLOBAL})
-    target_sources(${TARGET} PUBLIC ${VERILATE_SOURCES})
+    foreach(_VSOURCE ${VERILATE_SOURCES})
+        get_filename_component(_VSOURCE "${_VSOURCE}" ABSOLUTE BASE_DIR)
+        list(APPEND VSOURCES "${_VSOURCE}")
+    endforeach()
+    target_sources(${TARGET} PRIVATE ${VSOURCES})
 
     # Add the compile flags only on Verilated sources
-    foreach(VSOURCE ${OUTPUTS} ${${VERILATE_PREFIX}_GLOBAL})
+    foreach(C_SOURCE ${C_OUTPUTS} ${${VERILATE_PREFIX}_GLOBAL})
         string(REPLACE ";" " " _CFLAGS "${VERILATOR_CFLAGS};${VM_USER_CFLAGS}")
-        set_property(SOURCE "${VSOURCE}" APPEND PROPERTY COMPILE_FLAGS "${_CFLAGS}")
+        set_property(SOURCE "${C_SOURCE}" APPEND PROPERTY COMPILE_FLAGS "${_CFLAGS}")
     endforeach()
     foreach(VSLOW ${${VERILATE_PREFIX}_CLASSES_SLOW} ${${VERILATE_PREFIX}_SUPPORT_SLOW})
         set_property(SOURCE "${VSLOW}" APPEND PROPERTY COMPILE_FLAGS "${VERILATE_OPT_SLOW}")
@@ -229,6 +238,6 @@ function(verilate TARGET)
     if (${VERILATE_PREFIX}_THREADS)
         string(REPLACE ";" " " _LDFLAGS "${VERILATOR_MT_CFLAGS};${VM_USER_LDLIBS}")
         set_property(TARGET ${TARGET} APPEND PROPERTY LINK_FLAGS "${_LDFLAGS}")
-        target_compile_features("${TARGET}" PRIVATE cxx_std_11)
+        target_compile_features(${TARGET} PRIVATE cxx_std_11)
     endif()
 endfunction()
