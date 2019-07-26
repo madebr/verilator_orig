@@ -146,14 +146,14 @@ function(verilate TARGET)
         set(COMPILER gcc)
     endif()
 
-    set(DIR "${CMAKE_CURRENT_BINARY_DIR}/${VERILATE_PREFIX}.dir")
-    file(MAKE_DIRECTORY ${DIR})
+    set(VDIR "${CMAKE_CURRENT_BINARY_DIR}/${VERILATE_PREFIX}.dir")
+    file(MAKE_DIRECTORY ${VDIR})
 
-    set(VERILATOR_COMMAND "${VERILATOR_BIN}" -Wall -Wno-fatal --compiler ${COMPILER} --prefix ${VERILATE_PREFIX} --Mdir ${DIR} --make cmake ${VERILATOR_ARGS} ${VERILATE_VERILATOR_ARGS} ${VERILATE_SOURCES})
+    set(VERILATOR_COMMAND "${VERILATOR_BIN}" -Wall -Wno-fatal --compiler ${COMPILER} --prefix ${VERILATE_PREFIX} --Mdir ${VDIR} --make cmake ${VERILATOR_ARGS} ${VERILATE_VERILATOR_ARGS} ${VERILATE_SOURCES})
 
-    set(VCMAKE ${DIR}/${VERILATE_PREFIX}.cmake)
-    set(VCMAKE_COPY ${DIR}/${VERILATE_PREFIX}_copy.cmake)
-    if (NOT EXISTS ${VCMAKE})
+    set(VCMAKE "${VDIR}/${VERILATE_PREFIX}.cmake")
+    set(VCMAKE_COPY "${VDIR}/${VERILATE_PREFIX}_copy.cmake")
+    if (NOT EXISTS VCMAKE)
         execute_process(
             COMMAND ${VERILATOR_COMMAND}
             WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -169,7 +169,7 @@ function(verilate TARGET)
         execute_process(COMMAND "${CMAKE_COMMAND}" -E copy "${VCMAKE}" "${VCMAKE_COPY}")
     endif()
 
-    include(${VCMAKE_COPY})
+    include("${VCMAKE_COPY}")
 
     set(OUTPUTS ${${VERILATE_PREFIX}_CLASSES_FAST} ${${VERILATE_PREFIX}_CLASSES_SLOW} ${${VERILATE_PREFIX}_SUPPORT_FAST} ${${VERILATE_PREFIX}_SUPPORT_SLOW})
 
@@ -207,16 +207,28 @@ function(verilate TARGET)
     get_property(_PROP TARGET ${TARGET} PROPERTY VERILATOR_THREADED SET)
 
     target_sources(${TARGET} PRIVATE ${OUTPUTS} ${${VERILATE_PREFIX}_GLOBAL})
-    target_include_directories(${TARGET} PRIVATE ${VERILATOR_ROOT}/include ${VERILATOR_ROOT}/include/vltstd "${DIR}")
+    target_sources(${TARGET} PUBLIC ${VERILATE_SOURCES})
+
+    # Add the compile flags only on Verilated sources
+    foreach(VSOURCE ${OUTPUTS} ${${VERILATE_PREFIX}_GLOBAL})
+        string(REPLACE ";" " " _CFLAGS "${VERILATOR_CFLAGS};${VM_USER_CFLAGS}")
+        set_property(SOURCE "${VSOURCE}" APPEND PROPERTY COMPILE_FLAGS "${_CFLAGS}")
+    endforeach()
+    foreach(VSLOW ${${VERILATE_PREFIX}_CLASSES_SLOW} ${${VERILATE_PREFIX}_SUPPORT_SLOW})
+        set_property(SOURCE "${VSLOW}" APPEND PROPERTY COMPILE_FLAGS "${VERILATE_OPT_SLOW}")
+    endforeach()
+    foreach(VFAST ${${VERILATE_PREFIX}_CLASSES_FAST} ${${VERILATE_PREFIX}_SUPPORT_FAST})
+        set_property(SOURCE "${VSLOW}" APPEND PROPERTY COMPILE_FLAGS "${VERILATE_OPT_FAST}")
+    endforeach()
+
+    target_include_directories(${TARGET} PRIVATE "${VERILATOR_ROOT}/include" "${VERILATOR_ROOT}/include/vltstd" "${VDIR}")
     target_compile_definitions(${TARGET} PRIVATE VL_PRINTF=printf
         VM_COVERAGE=$<BOOL:$<TARGET_PROPERTY:VERILATOR_COVERAGE>>  VM_SC=$<BOOL:$<TARGET_PROPERTY:VERILATOR_SYSTEMC>>
         VM_TRACE=$<BOOL:$<TARGET_PROPERTY:VERILATOR_TRACE>> $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_THREADED>>:VL_THREADED>)
-    target_compile_options(${TARGET} PRIVATE ${VERILATOR_CFLAGS} ${VM_USER_CFLAGS})
-    if(VERILATE_THREADS)
-        string(REPLACE ";" " " VERILATOR_MT_CFLAGS_ARG "${VERILATOR_MT_CFLAGS}")
-        set_property(TARGET ${TARGET} PROPERTY APPEND PROPERTY LINK_FLAGS ${VERILATOR_MT_CFLAGS_ARG})
+
+    if (${VERILATE_PREFIX}_THREADS)
+        string(REPLACE ";" " " _LDFLAGS "${VERILATOR_MT_CFLAGS};${VM_USER_LDLIBS}")
+        set_property(TARGET ${TARGET} APPEND PROPERTY LINK_FLAGS "${_LDFLAGS}")
         target_compile_features("${TARGET}" PRIVATE cxx_std_11)
     endif()
-    set_source_files_properties(${${VERILATE_PREFIX}_CLASSES_SLOW} ${${VERILATE_PREFIX}_SUPPORT_SLOW} PROPERTIES COMPILE_FLAGS "${VERILATE_OPT_SLOW}")
-    set_source_files_properties(${${VERILATE_PREFIX}_CLASSES_FAST} ${${VERILATE_PREFIX}_SUPPORT_FAST} PROPERTIES COMPILE_FLAGS "${VERILATE_OPT_FAST}")
 endfunction()
