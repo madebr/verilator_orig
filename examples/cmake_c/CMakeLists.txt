@@ -1,9 +1,9 @@
 ######################################################################
 #
-# DESCRIPTION: Verilator Example: Small CMakeLists.txt
+# DESCRIPTION: Verilator CMake Example: Small CMakeLists.txt
 #
-# This is an example cmake script to build a verilog project using
-# cmake and verilator.
+# This is an example cmake script to build a verilog to systemc project
+# using cmake and verilator.
 #
 # Copyright 2003-2019 by Wilson Snyder. This program is free software; you can
 # redistribute it and/or modify it under the terms of either the GNU
@@ -12,16 +12,16 @@
 #
 ######################################################################
 
-# This example builds the hello_world_c example using CMake
+# This example builds the tracing_c example using CMake
 # To use it, run the following:
 
-# cd /path/to/verilator/examples/cmake
+# cd /path/to/verilator/examples/cmake_c
 # rm -rf build && mkdir build && cd build
 # cmake ..
 # cmake --build .
 
 cmake_minimum_required(VERSION 3.8)
-project(cmake_example)
+project(cmake_c_example)
 
 find_package(verilator HINTS $ENV{VERILATOR_ROOT})
 if (NOT verilator_FOUND)

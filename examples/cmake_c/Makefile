@@ -3,8 +3,8 @@
 # DESCRIPTION: Verilator CMake example usage
 #
 # This file shows usage of the cmake script.
-# This makefile is mainly here for testing the examples and should
-# generally not be added a cmake project.
+# This makefile is here for testing the examples and should
+# generally not be added to a cmake project.
 #
 # Copyright 2003-2019 by Wilson Snyder. This program is free software; you can
 # redistribute it and/or modify it under the terms of either the GNU
@@ -17,8 +17,9 @@
 # Set up variables
 
 # If $VERILATOR_ROOT isn't in the environment, we assume it is part of a
-# package inatall, and verilator is in your path. Otherwise find the
+# package install, and verilator is in your path. Otherwise find the
 # binary relative to $VERILATOR_ROOT (such as when inside the git sources).
+
 ifeq ($(VERILATOR_ROOT),)
 VERILATOR_COVERAGE = verilator_coverage
 else
@@ -44,17 +45,9 @@ endif
 
 default: $(TARGET)
 
-ifeq ($(CMAKE_GT_3_8),true)
-default: run
-else
-default: nocmake
-temp:
-	echo "version is not ok: $(CMAKE_VERSION)"
-endif
-
 run:
 	@echo
-	@echo "-- Verilator cmake hello-world simple example"
+	@echo "-- Verilator cmake tracing example"
 
 	@echo
 	@echo "-- CMake ----------------"
