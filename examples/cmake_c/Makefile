@@ -51,7 +51,6 @@ run:
 
 	@echo
 	@echo "-- CMake ----------------"
-	rm -rf build && mkdir build
 	cd build && cmake ..
 
 	@echo
@@ -71,6 +70,9 @@ run:
 	@echo "-- DONE --------------------"
 	@echo "To see waveforms, open vlt_dump.vcd in a waveform viewer"
 	@echo
+
+clean:
+	@rm -rf build && mkdir build
 
 nocmake:
 	@echo
