@@ -98,8 +98,6 @@ class CMakeEmitter {
         *of << "\n### Constants...\n";
         cmake_set(*of, "PERL", deslash(V3Options::getenvPERL()), "FILEPATH", "Perl executable (from $PERL)");
         cmake_set(*of, "VERILATOR_ROOT", deslash(V3Options::getenvVERILATOR_ROOT()), "PATH" ,"Path to Verilator kit (from $VERILATOR_ROOT)");
-        cmake_set(*of, "SYSTEMC_INCLUDE", deslash(V3Options::getenvSYSTEMC_INCLUDE()), "PATH", "SystemC include directory with systemc.h (from $SYSTEMC_INCLUDE)");
-        cmake_set(*of, "SYSTEMC_LIBDIR", deslash(V3Options::getenvSYSTEMC_LIBDIR()), "PATH", "SystemC library directory with libsystemc.a (from $SYSTEMC_LIBDIR)");
 
         *of << "\n### Switches...\n";
         *of << "# SystemC output mode?  0/1 (from --sc)\n";
@@ -113,11 +111,11 @@ class CMakeEmitter {
 
         *of << "\n### Switches...\n";
         *of << "# Coverage output mode?  0/1 (from --coverage)\n";
-        cmake_set(*of, name + "_COVERAGE", v3Global.opt.coverage()?"1":"0");
+        cmake_set_raw(*of, name + "_COVERAGE", v3Global.opt.coverage()?"1":"0");
         *of << "# Threaded output mode?  0/1/N threads (from --threads)\n";
-        cmake_set(*of, name + "_THREADS", cvtToStr(v3Global.opt.threads()));
+        cmake_set_raw(*of, name + "_THREADS", cvtToStr(v3Global.opt.threads()));
         *of << "# Tracing output mode?  0/1 (from --trace)\n";
-        cmake_set(*of, name + "_TRACE", v3Global.opt.trace()?"1":"0");
+        cmake_set_raw(*of, name + "_TRACE", v3Global.opt.trace()?"1":"0");
 
         *of << "\n### Object file lists...\n";
         std::vector<string> classes_fast, classes_slow, support_fast, support_slow, global;
