@@ -604,8 +604,6 @@ int main(int argc, char** argv, char** env) {
     // Check environment
     V3Options::getenvSYSTEMC();
     V3Options::getenvSYSTEMC_ARCH();
-    V3Options::getenvSYSTEMC_INCLUDE();
-    V3Options::getenvSYSTEMC_LIBDIR();
 
     V3Error::abortIfErrors();
 
