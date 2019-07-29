@@ -154,7 +154,8 @@ function(verilate TARGET)
 
     set(VCMAKE "${VDIR}/${VERILATE_PREFIX}.cmake")
     set(VCMAKE_COPY "${VDIR}/${VERILATE_PREFIX}_copy.cmake")
-    if (NOT EXISTS VCMAKE)
+    if (NOT EXISTS "${VCMAKE_COPY}")
+        message(STATUS "Executing Verilator...")
         execute_process(
             COMMAND ${VERILATOR_COMMAND}
             WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -175,6 +176,9 @@ function(verilate TARGET)
     set(C_OUTPUTS ${${VERILATE_PREFIX}_CLASSES_FAST} ${${VERILATE_PREFIX}_CLASSES_SLOW} ${${VERILATE_PREFIX}_SUPPORT_FAST} ${${VERILATE_PREFIX}_SUPPORT_SLOW})
     foreach(C_OUTPUT ${C_OUTPUTS})
         get_filename_component(C_OUTPUT_NAME_WE "${C_OUTPUT}" NAME_WE)
+        if(C_OUTPUT_NAME_WE MATCHES ".*Trace.*")
+            continue()
+        endif()
         list(APPEND H_OUTPUTS "${VDIR}/${C_OUTPUT_NAME_WE}.h")
     endforeach()
     set(OUTPUTS ${C_OUTPUTS} ${H_OUTPUTS})
