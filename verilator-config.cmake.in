@@ -42,7 +42,7 @@ endif()
 set(verilator_FOUND 1)
 
 include(CheckCXXSourceCompiles)
-macro(_verilator_check_cxx_libraries LIBRARIES RESVAR)
+function(_verilator_check_cxx_libraries LIBRARIES RESVAR)
     # Check whether a particular link option creates a valid executable
     set(_VERILATOR_CHECK_CXX_LINK_OPTIONS_SRC "int main() {return 0;}\n")
     set(CMAKE_REQUIRED_FLAGS)
@@ -52,7 +52,8 @@ macro(_verilator_check_cxx_libraries LIBRARIES RESVAR)
     set(CMAKE_REQUIRED_LIBRARIES ${LIBRARIES})
     set(CMAKE_REQUIRED_QUIET)
     check_cxx_source_compiles("${_VERILATOR_CHECK_CXX_LINK_OPTIONS_SRC}" "${RESVAR}")
-endmacro()
+    set("${RESVAR}" "${${RESVAR}}" PARENT_SCOPE)
+endfunction()
 
 # Check compiler flag support. Skip on MSVC, these are all GCC flags.
 if (NOT CMAKE_CXX_COMPILER_ID MATCHES MSVC)
