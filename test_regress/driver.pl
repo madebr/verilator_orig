@@ -962,6 +962,8 @@ sub compile {
                               "-DTEST_VERILATOR_ARGS=\"@vlt_args\"",
                               "-DTEST_VERILATOR_SOURCES=\"$param{top_filename} @{$param{v_other_filenames}}\"",
                               "-DTEST_VERBOSE=\"$opt_verbose\"",
+                              "-DTEST_SYSTEMC=\"" . $self->sc. "\"",
+                              "-DCMAKE_PREFIX_PATH=\"".$ENV{SYSTEMC_INCLUDE}."/..;".$ENV{SYSTEMC}."/..\"",
                               "-DTEST_OPT_FAST=\"" . ($param{benchmark}?"-O2":"") . "\"",
                               "-DTEST_VERILATION=\"" . $::Opt_Verilation . "\"",
                               ($self->{verbose} ? "--verbose" : ""),
@@ -1244,7 +1246,6 @@ sub cmake_version {
     my $cmake_version = `$cmake_bin --version`;
     $cmake_version =~ /cmake version (\d+)\.(\d+)/;
     $cmake_version = "$1.$2";
-    print "cmake_version is $cmake_version\n";
     return version->declare($cmake_version);
 }
 

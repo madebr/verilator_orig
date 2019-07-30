@@ -12,7 +12,7 @@
 ######################################################################
 
 cmake_minimum_required(VERSION 3.8)
-set(TEST_REQUIRED_VARS NAME CSOURCES OPT_FAST VERILATOR_ROOT VERILATOR_ARGS VERILATOR_SOURCES VERBOSE VERILATION)
+set(TEST_REQUIRED_VARS NAME CSOURCES OPT_FAST VERILATOR_ROOT VERILATOR_ARGS VERILATOR_SOURCES SYSTEMC VERBOSE VERILATION)
 foreach(var ${TEST_REQUIRED_VARS})
     if (NOT DEFINED TEST_${var})
         message(FATAL_ERROR "TEST_${var} not defined. This CMakeLists.txt file is meant to be run by driver.pl.")
@@ -81,10 +81,20 @@ list(FIND TEST_VERILATOR_ARGS "-cc" _INDEX)
 if(NOT _INDEX EQUAL -1)
     list(REMOVE_AT TEST_VERILATOR_ARGS ${_INDEX})
 endif()
+list(FIND TEST_VERILATOR_ARGS "--cc" _INDEX)
+if(NOT _INDEX EQUAL -1)
+    list(REMOVE_AT TEST_VERILATOR_ARGS ${_INDEX})
+endif()
 
 # Remove -sc
 list(FIND TEST_VERILATOR_ARGS "-sc" _INDEX)
 if(NOT _INDEX EQUAL -1)
+    set(TEST_SYSTEMC 1)
+    list(REMOVE_AT TEST_VERILATOR_ARGS ${_INDEX})
+endif()
+list(FIND TEST_VERILATOR_ARGS "--sc" _INDEX)
+if(NOT _INDEX EQUAL -1)
+    set(TEST_SYSTEMC 1)
     list(REMOVE_AT TEST_VERILATOR_ARGS ${_INDEX})
 endif()
 
@@ -93,7 +103,6 @@ separate_arguments(TEST_VERILATOR_SOURCES)
 list(FILTER TEST_VERILATOR_SOURCES EXCLUDE REGEX "$^")
 
 find_package(verilator REQUIRED HINTS ${TEST_VERILATOR_ROOT})
-
 
 set(verilate_ARGS MAIN)
 if(TEST_TOP_MODULE)
@@ -108,6 +117,15 @@ endif()
 if(TEST_THREADS)
     list(APPEND verilate_ARGS THREADS ${TEST_THREADS})
 endif()
+if(TEST_SYSTEMC)
+    list(APPEND verilate_ARGS SYSTEMC)
+    find_package(SystemCLanguage)
+    if(NOT SystemCLanguage_FOUND)
+        message("SystemC has no CMake support")
+        message("Compile SystemC using CMake and pass its CMAKE_MODULE_PREFIX.")
+        message("Using the environment variables SYSTEMC_INCLUDE and SYSTEMC.")
+    endif()
+endif()
 
 set(TARGET_NAME "V${TEST_NAME}")
 
@@ -115,4 +133,14 @@ add_executable(${TARGET_NAME} ${TEST_CSOURCES})
 
 if(TEST_VERILATION)
     verilate(${TARGET_NAME} ${verilate_ARGS} VERILATOR_ARGS ${TEST_VERILATOR_ARGS} SOURCES ${TEST_VERILATOR_SOURCES})
+endif()
+
+if(TEST_SYSTEMC)
+    if(TARGET SystemC::systemc)
+        target_link_libraries(${TARGET_NAME} PUBLIC SystemC::systemc)
+    else()
+        target_include_directories(${TARGET_NAME} PUBLIC $ENV{SYSTEMC_INCLUDE})
+        target_link_directories(${TARGET_NAME} PUBLIC $ENV{SYSTEMC})
+        target_link_libraries(${TARGET_NAME} PUBLIC systemc)
+    endif()
 endif()
