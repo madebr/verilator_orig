@@ -2,9 +2,9 @@
 #
 # DESCRIPTION: Verilator CMake example usage
 #
-# This file shows usage of the cmake script.
+# This file shows usage of the CMake script.
 # This makefile is here for testing the examples and should
-# generally not be added to a cmake project.
+# generally not be added to a CMake project.
 #
 # Copyright 2003-2019 by Wilson Snyder. This program is free software; you can
 # redistribute it and/or modify it under the terms of either the GNU
@@ -28,7 +28,7 @@ VERILATOR_COVERAGE = $(VERILATOR_ROOT)/bin/verilator_coverage
 endif
 ######################################################################
 
-# Check if cmake is installed and of correct version
+# Check if CMake is installed and of correct version
 ifeq ($(shell which cmake),)
 	TARGET := nocmake
 else
@@ -37,7 +37,9 @@ CMAKE_MAJOR := $(shell echo $(CMAKE_VERSION) | cut -f1 -d.)
 CMAKE_MINOR := $(shell echo $(CMAKE_VERSION) | cut -f2 -d.)
 CMAKE_GT_3_8 := $(shell [ $(CMAKE_MAJOR) -gt 3 -o \( $(CMAKE_MAJOR) -eq 3 -a $(CMAKE_MINOR) -ge 8 \) ] && echo true)
 ifeq ($(CMAKE_GT_3_8),true)
-FINDSC := $(shell cmake --find-package -DNAME=SystemCLanguage -DCMAKE_USE_PTHREADS_INIT=ON -DCOMPILER_ID=GNU -DLANGUAGE=CXX -DMODE=EXIST -DThreads_FOUND=ON)
+# Test whether SystemC is installed with CMake support
+# This will print a CMake error about processing arguments that can (currently) be ignored.
+FINDSC := $(shell mkdir -p build && cd build && cmake --find-package -DNAME=SystemCLanguage -DCMAKE_USE_PTHREADS_INIT=ON -DCOMPILER_ID=GNU -DLANGUAGE=CXX -DMODE=EXIST -DThreads_FOUND=ON)
 ifneq (,$(findstring SystemCLanguage found,$(FINDSC)))
 TARGET := run
 else
@@ -52,11 +54,11 @@ default: $(TARGET)
 
 run:
 	@echo
-	@echo "-- Verilator cmake systemc tracing example"
+	@echo "-- Verilator CMake SystemC tracing example"
 
 	@echo
 	@echo "-- CMake ----------------"
-	cd build && cmake ..
+	mkdir -p build && cd build && cmake ..
 
 	@echo
 	@echo "-- COMPILE -----------------"
@@ -81,15 +83,16 @@ clean:
 
 nocmake:
 	@echo
-	@echo "%Skip: cmake has not been found"
+	@echo "%Skip: CMake has not been found"
 	@echo
 
 oldcmake:
 	@echo
-	@echo "%Skip: cmake version is too old (need at least 3.8)"
+	@echo "%Skip: CMake version is too old (need at least 3.8)"
 	@echo
 
 nosc:
 	@echo
-	@echo "%Skip: cmake could not find systemc. Please compile and install systemc with cmake support."
+	@echo "%Skip: CMake could not find SystemC. Please compile and install SystemC with CMake support."
+	@echo "% Make sure that CMAKE_CXX_STANDARD of the SystemC libray and this example match."
 	@echo

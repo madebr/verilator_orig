@@ -2,9 +2,9 @@
 #
 # DESCRIPTION: Verilator CMake example usage
 #
-# This file shows usage of the cmake script.
+# This file shows usage of the CMake script.
 # This makefile is here for testing the examples and should
-# generally not be added to a cmake project.
+# generally not be added to a CMake project.
 #
 # Copyright 2003-2019 by Wilson Snyder. This program is free software; you can
 # redistribute it and/or modify it under the terms of either the GNU
@@ -28,7 +28,7 @@ VERILATOR_COVERAGE = $(VERILATOR_ROOT)/bin/verilator_coverage
 endif
 ######################################################################
 
-# Check if cmake is installed and of correct version
+# Check if CMake is installed and of correct version
 ifeq ($(shell which cmake),)
 TARGET := nocmake
 else
@@ -47,11 +47,11 @@ default: $(TARGET)
 
 run:
 	@echo
-	@echo "-- Verilator cmake tracing example"
+	@echo "-- Verilator CMake tracing example"
 
 	@echo
 	@echo "-- CMake ----------------"
-	cd build && cmake ..
+	mkdir -p build && cd build && cmake ..
 
 	@echo
 	@echo "-- COMPILE -----------------"
@@ -76,10 +76,10 @@ clean:
 
 nocmake:
 	@echo
-	@echo "%Skip: cmake has not been found"
+	@echo "%Skip: CMake has not been found"
 	@echo
 
 oldcmake:
 	@echo
-	@echo "%Skip: cmake version is too old (need at least 3.8)"
+	@echo "%Skip: CMake version is too old (need at least 3.8)"
 	@echo
