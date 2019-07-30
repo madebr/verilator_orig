@@ -289,6 +289,7 @@ m4_foreach([cflag],[
         [-Wno-unused-variable],
         [-Wno-shadow]],[
     _MY_CXX_CHECK_OPT(CFG_CXXFLAGS_NO_UNUSED,cflag)
+    # CMake will test what flags work itself, so pass all flags through to it
     CFG_CXX_FLAGS_CMAKE="$CFG_CXX_FLAGS_CMAKE cflag"
     ])
 AC_SUBST(CFG_CXXFLAGS_NO_UNUSED)
@@ -301,6 +302,7 @@ m4_foreach([ldflag], [
         [-lpthread],
         [-latomic]],[
     _MY_LDLIBS_CHECK_OPT(CFG_LDLIBS_THREADS,ldflag)
+    # CMake will test what flags work itself, so pass all flags through to it
     CFG_LDFLAGS_THREADS_CMAKE="$CFG_LDFLAGS_THREADS_CMAKE ldflag"
     ])
 AC_SUBST(CFG_LDLIBS_THREADS)
