@@ -72,7 +72,7 @@ run:
 	@echo
 
 clean:
-	@rm -rf build && mkdir build
+	@rm -rf build
 
 nocmake:
 	@echo
