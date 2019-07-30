@@ -89,7 +89,7 @@ class CMakeEmitter {
         string name = v3Global.opt.prefix();
 
         *of << "# Verilated -*- CMake -*-\n";
-        *of << "# DESCRIPTION: Verilator output: CMake include script with class lists\n";
+        *of << "# DESCR" "IPTION: Verilator output: CMake include script with class lists\n";
         *of << "#\n";
         *of << "# This CMake script lists generated Verilated files, for including in higher level CMake scripts.\n";
         *of << "# This file is meant to be consumed by the verilate() function,\n";

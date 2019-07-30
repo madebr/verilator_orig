@@ -43,7 +43,7 @@ public:
         // Generate the makefile
         V3OutMkFile of (v3Global.opt.makeDir()+"/"+v3Global.opt.prefix()+"_classes.mk");
         of.putsHeader();
-        of.puts("# DESCRIPTION: Verilator output: Make include file with class lists\n");
+        of.puts("# DESCR" "IPTION: Verilator output: Make include file with class lists\n");
         of.puts("#\n");
         of.puts("# This file lists generated Verilated files, for including in higher level makefiles.\n");
         of.puts("# See "+v3Global.opt.prefix()+".mk"+" for the caller.\n");
