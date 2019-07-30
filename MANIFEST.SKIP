@@ -15,6 +15,7 @@
 .*\.vcd
 .*\.1
 \.travis\.yml
+/build/
 /obj_dir/
 /obj_dbg/
 /obj_nc/
