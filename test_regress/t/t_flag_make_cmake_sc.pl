@@ -11,14 +11,10 @@ if (!$::Driver) { use FindBin; exec("$FindBin::Bin/bootstrap.pl", @ARGV, $0); di
 
 scenarios(simulator => 1);
 
-top_filename("t/t_a_first_cc.v");
-
-$DEBUG_QUIET = "--debug --debugi 0 --gdbbt --no-dump-tree";
-
 compile(
     verilator_make_gmake => 0,
     verilator_make_cmake => 1,
-    verilator_flags2 => [$DEBUG_QUIET, "-sc --trace"],
+    verilator_flags2 => ["-sc"],
     );
 
 execute(
