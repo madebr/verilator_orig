@@ -20,7 +20,7 @@
 
 cmake_minimum_required(VERSION 3.8)
 
-#Prefer VERILATOR_ROOT from environment
+# Prefer VERILATOR_ROOT from environment
 if (DEFINED ENV{VERILATOR_ROOT})
     set(VERILATOR_ROOT "$ENV{VERILATOR_ROOT}" CACHE PATH "VERILATOR_ROOT")
 endif()

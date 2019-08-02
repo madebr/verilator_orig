@@ -43,7 +43,11 @@ FINDSC := $(shell mkdir -p build && cd build && cmake --find-package -DNAME=Syst
 ifneq (,$(findstring SystemCLanguage found,$(FINDSC)))
 TARGET := run
 else
+ifneq (${SYSTEMC_ROOT},)
+TARGET := run
+else
 TARGET := nosc
+endif
 endif
 else
 TARGET := oldcmake
@@ -93,6 +97,10 @@ oldcmake:
 
 nosc:
 	@echo
-	@echo "%Skip: CMake could not find SystemC. Please compile and install SystemC with CMake support."
-	@echo "% Make sure that CMAKE_CXX_STANDARD of the SystemC libray and this example match."
+	@echo "%Skip: CMake could not find SystemC.
+	@echo "% Make sure that:"
+	@echo "% - If using the CMake support of SystemC, make sure that the SystemC installation path is in CMAKE_PREFIX_PATH"
+	@echo "% - Else, make sure that the SystemC installation path is in the SYSTEMC_ROOT environment variable"
+	@echo "% - C++ standard of SystemC is the same as this example."
+	@echo "% Please read the CMake section in the Verilator documentation for more information."
 	@echo

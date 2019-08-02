@@ -30,15 +30,34 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-find_package(SystemCLanguage)
+# Find SystemC using SystemC's CMake integration
+find_package(SystemCLanguage QUIET)
+
 if (NOT SystemCLanguage_FOUND)
-    message(FATAL_ERROR "SystemC was not found.")
+    # Find SystemC using include and library paths
+    find_path(SYSTEMC_INCLUDE NAMES systemc.h
+        HINTS "${SYSTEMC_ROOT}" ENV SYSTEMC_ROOT
+        PATH_SUFFIXES include)
+    find_library(SYSTEMC_LIBRARY NAMES systemc
+        HINTS "${SYSTEMC_ROOT}" ENV SYSTEMC_ROOT
+        PATH_SUFFIXES lib)
+
+    # Fail if no include or library path is found
+    if(NOT SYSTEMC_INCLUDE OR NOT SYSTEMC_LIBRARY)
+        message(FATAL_ERROR "SystemC was not found.")
+    endif()
+
+    add_library(SystemC::systemc INTERFACE IMPORTED)
+    set_target_properties(SystemC::systemc
+        PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${SYSTEMC_INCLUDE}"
+            INTERFACE_LINK_LIBRARIES "${SYSTEMC_LIBRARY}")
 endif()
 
 # Create a new executable target that will contain all your sources
 add_executable(example ${CMAKE_CURRENT_SOURCE_DIR}/../tracing_sc/sc_main.cpp)
 
-# Add the verilated circuit to the target
+# Add the Verilated circuit to the target
 verilate(example SYSTEMC COVERAGE TRACE
     INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../tracing_sc"
     VERILATOR_ARGS -f ${CMAKE_CURRENT_SOURCE_DIR}/../tracing_sc/input.vc -O2 -x-assign 0
