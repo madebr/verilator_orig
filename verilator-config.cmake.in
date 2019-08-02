@@ -262,7 +262,7 @@ function(verilator_link_systemc TARGET)
 
             # Fail if no include or library path is found
             if(NOT SYSTEMC_INCLUDE OR NOT SYSTEMC_LIBRARY)
-                message(FATAL_ERROR "SystemC was not found.")
+                message(FATAL_ERROR "SystemC was not found: install SystemC with CMake support or set the SYSTEMC_ROOT variable to a SystemC installation")
             endif()
 
             add_library(SystemC::systemc INTERFACE IMPORTED)
