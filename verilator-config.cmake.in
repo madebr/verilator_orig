@@ -246,3 +246,32 @@ function(verilate TARGET)
         target_compile_features(${TARGET} PRIVATE cxx_std_11)
     endif()
 endfunction()
+
+function(verilator_link_systemc TARGET)
+    if (NOT TARGET SystemC::systemc)
+        find_package(SystemCLanguage QUIET)
+
+        if (NOT SystemCLanguage_FOUND)
+            # Find SystemC using include and library paths
+            find_path(SYSTEMC_INCLUDE NAMES systemc.h
+                HINTS "${SYSTEMC_ROOT}" ENV SYSTEMC_ROOT
+                PATH_SUFFIXES include)
+            find_library(SYSTEMC_LIBRARY NAMES systemc
+                HINTS "${SYSTEMC_ROOT}" ENV SYSTEMC_ROOT
+                PATH_SUFFIXES lib)
+
+            # Fail if no include or library path is found
+            if(NOT SYSTEMC_INCLUDE OR NOT SYSTEMC_LIBRARY)
+                message(FATAL_ERROR "SystemC was not found.")
+            endif()
+
+            add_library(SystemC::systemc INTERFACE IMPORTED)
+            set_target_properties(SystemC::systemc
+                PROPERTIES
+                    INTERFACE_INCLUDE_DIRECTORIES "${SYSTEMC_INCLUDE}"
+                    INTERFACE_LINK_LIBRARIES "${SYSTEMC_LIBRARY}")
+        endif()
+    endif()
+
+    target_link_libraries("${TARGET}" PUBLIC $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_SYSTEMC>>:SystemC::systemc>)
+endfunction()

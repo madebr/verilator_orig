@@ -2405,6 +2405,13 @@ the CMAKE_PREFIX_PATH variable during CMake configuration.
 Don't forget to set the same C++ standard for the Verilated sources
 as the SystemC library.
 
+Verilator's CMake script provides a convenience function to
+automatically find and link to the SystemC library. It requires a SystemC
+installation or the SYSTEMC_ROOT (environment) variable set.
+It can be used as:
+
+    verilator_link_systemc(target)
+
 =over 4
 
 =item target

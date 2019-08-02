@@ -97,7 +97,7 @@ oldcmake:
 
 nosc:
 	@echo
-	@echo "%Skip: CMake could not find SystemC.
+	@echo "%Skip: CMake could not find SystemC."
 	@echo "% Make sure that:"
 	@echo "% - If using the CMake support of SystemC, make sure that the SystemC installation path is in CMAKE_PREFIX_PATH"
 	@echo "% - Else, make sure that the SystemC installation path is in the SYSTEMC_ROOT environment variable"
