@@ -57,38 +57,44 @@ class PythonEmitter {
         ofp->puts("inline auto declare_" + v3Global.opt.prefix() + "(pybind11::module& m) {\n");
         ofp->puts("return VL_PY_MODULE(m, "+v3Global.opt.prefix()+")\n");
 
+        ofp->indentInc();
+
         for (AstNode* nodep=modp->stmtsp(); nodep; nodep = nodep->nextp()) {
             const AstVar* varp = VN_CAST(nodep, Var);
             // Export top level ports
             if (varp && varp->isIO()) {
-                ofp->puts("\tVL_PY_PORT("+v3Global.opt.prefix()+", "+nodep->name()+")\n");
+                ofp->puts("VL_PY_PORT("+v3Global.opt.prefix()+", "+nodep->name()+")\n");
             }
             // Export non const parameters
             if (varp && varp->isParam() && !VN_IS(varp->valuep(), Const)) {
-                ofp->puts("\tVL_PY_PARAM("+v3Global.opt.prefix()+","+nodep->name()+")\n");
+                ofp->puts("VL_PY_PARAM("+v3Global.opt.prefix()+","+nodep->name()+")\n");
             }
             // Export public functions
             const AstCFunc* funcp = VN_CAST(nodep, CFunc);
             if (funcp && !funcp->skipDecl() && !funcp->dpiImport() && funcp->funcPublic()) {
                 if (funcp->ifdef()!="") ofp->puts("#ifdef "+funcp->ifdef()+"\n");
-                ofp->puts((funcp->isStatic().trueU() ? "\tVL_PY_FUNC_STATIC(" : "\tVL_PY_FUNC("));
+                ofp->puts((funcp->isStatic().trueU() ? "VL_PY_FUNC_STATIC(" : "VL_PY_FUNC("));
                 ofp->puts(v3Global.opt.prefix()+", " + funcp->name() + ")\n");
                 if (funcp->ifdef()!="") ofp->puts("#endif  // "+funcp->ifdef()+"\n");
             }
         }
 
-        ofp->puts("\tVL_PY_FUNC("+v3Global.opt.prefix()+", eval)\n");
-        ofp->puts("\tVL_PY_FUNC("+v3Global.opt.prefix()+", final)\n");
+        ofp->puts("VL_PY_FUNC("+v3Global.opt.prefix()+", eval)\n");
+        ofp->puts("VL_PY_FUNC("+v3Global.opt.prefix()+", final)\n");
 
         if (v3Global.opt.trace()) {
-            ofp->puts("\tVL_PY_FUNC_TRACE("+v3Global.opt.prefix()+")\n");
+            ofp->puts("VL_PY_FUNC_TRACE("+v3Global.opt.prefix()+")\n");
         }
 
         if (v3Global.opt.inhibitSim()) {
-            ofp->puts("\tVL_PY_FUNC("+v3Global.opt.prefix()+", inhibitSim)\n");
+            ofp->puts("VL_PY_FUNC("+v3Global.opt.prefix()+", inhibitSim)\n");
         }
 
-        ofp->puts("\t;\n}\n\n}  // namespace vl_py\n\n");
+        ofp->puts(";");
+        ofp->indentDec();
+
+        ofp->puts("\n}\n\n}  // namespace vl_py\n\n");
+
 
         // finish up h-file
         ofp->puts("#endif  // _" + v3Global.opt.prefix() + "_PY_H_\n");

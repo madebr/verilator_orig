@@ -654,6 +654,8 @@ int V3OutFormatter::endLevels(const char *strg) {
         const char* cp = strg;
         while (isspace(*cp)) cp++;
         switch (*cp) {
+        case '\0':  // End of string... No need for whitespace before it
+            return (0);
         case '\n':  // Newlines.. No need for whitespace before it
             return (0);
         case '#':  // Preproc directive
@@ -695,7 +697,7 @@ int V3OutFormatter::endLevels(const char *strg) {
 
 void V3OutFormatter::puts(const char *strg) {
     if (m_prependIndent) {
-        putsNoTracking(indentStr(endLevels(strg)));
+        putsNoTracking(indentSpaces(endLevels(strg)));
         m_prependIndent = false;
     }
     bool wordstart = true;
@@ -706,11 +708,11 @@ void V3OutFormatter::puts(const char *strg) {
         case '\n':
             m_lineno++;
             wordstart = true;
-            if (cp[1]=='\0') {
+            if (cp[1]=='\0' || cp[1]=='\n') {
                 m_prependIndent = true;  // Add the indent later, may be a indentInc/indentDec called between now and then
             } else {
                 m_prependIndent = false;
-                putsNoTracking(indentStr(endLevels(cp+1)));
+                putsNoTracking(indentSpaces(endLevels(cp+1)));
             }
             break;
         case ' ':
@@ -814,7 +816,7 @@ void V3OutFormatter::putBreak() {
         //char s[1000]; sprintf(s, "{%d,%d}", m_column, m_parenVec.top()); putsNoTracking(s);
         if (exceededWidth()) {
             putcNoTracking('\n');
-            if (!m_parenVec.empty()) putsNoTracking(indentStr(m_parenVec.top()));
+            if (!m_parenVec.empty()) putsNoTracking(indentSpaces(m_parenVec.top()));
         }
     }
 }
