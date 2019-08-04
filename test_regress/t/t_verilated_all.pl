@@ -16,13 +16,10 @@ compile(
     verilator_flags2 => ["--cc",
                          "--coverage-toggle --coverage-line --coverage-user",
                          "--trace --vpi ",
+                         "--python",
                          ($Self->cfg_with_threaded
                           ? "--threads 2 $root/include/verilated_threads.cpp" : ""),
                          "$root/include/verilated_save.cpp"],
-    );
-
-execute(
-    check_finished => 1,
     );
 
 my %hit;
