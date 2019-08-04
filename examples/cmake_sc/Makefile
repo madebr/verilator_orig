@@ -124,10 +124,10 @@ nosc:
 	@echo
 	@echo "%Skip: SystemC not found"
 	@echo "% Make sure that either:"
-	@echo "% - The environment variables SYSTEMC_INCLUDE and SYSTEMC_LIBDIR are set and exported; or"
-	@echo "% - The environment variable SYSTEMC_ROOT is set; or"
-	@echo "% - The environment variable SYSTEMC is set; or"
+	@echo "% - The environment variables SYSTEMC_INCLUDE and SYSTEMC_LIBDIR are exported; or"
+	@echo "% - The environment variable SYSTEMC_ROOT is exported; or"
+	@echo "% - The environment variable SYSTEMC is exported; or"
 	@echo "% - If the SystemC installation provides CMake support, that its installation prefix is in CMAKE_PREFIX_PATH"
-	@echo "% - C++ standard of the SystemC is the same as this example."
+	@echo "% - C++ standard of the SystemC library is the same as this example."
 	@echo "% Please read the CMake section in the Verilator documentation for more information."
 	@echo

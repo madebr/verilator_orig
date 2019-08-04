@@ -2380,37 +2380,32 @@ if optional.
 
 When generating Verilated SystemC sources, you should also include the SystemC
 include directories and link to the SystemC libraries.
-The location of SystemC can be set during CMake configuration by
-setting the SYSTEMC_ROOT variable accordingly.
-This can be done using the following CMake code:
 
-    # Find SystemC using include and library paths
-    find_path(SYSTEMC_INCLUDE NAMES systemc.h
-        HINTS "${SYSTEMC_ROOT}" ENV SYSTEMC_ROOT
-        PATH_SUFFIXES include)
-    find_library(SYSTEMC_LIBRARY NAMES systemc
-        HINTS "${SYSTEMC_ROOT}" ENV SYSTEMC_ROOT
-        PATH_SUFFIXES lib)
-    target_include_directories(target PUBLIC ${SYSTEMC_INCLUDE})
-    target_link_libraries(target PUBLIC ${SYSTEMC_LIBRARY})
-
-When using Accellera's SystemC with CMake support, a CMake target is available
-that will easen above steps. This will only work if the SystemC installation
-can be found by CMake. This can be configured by setting
-the CMAKE_PREFIX_PATH variable during CMake configuration.
-
-    find_package(SystemCLanguage REQUIRED)
-    target_link_librarise(target PUBLIC SystemC::systemc)
-
-Don't forget to set the same C++ standard for the Verilated sources
-as the SystemC library.
-
-Verilator's CMake script provides a convenience function to
-automatically find and link to the SystemC library. It requires a SystemC
-installation or the SYSTEMC_ROOT (environment) variable set.
+Verilator's CMake support provides a convenience function to
+automatically find and link to the SystemC library.
 It can be used as:
 
     verilator_link_systemc(target)
+
+where target is the name of your target.
+
+The search paths can be configured by setting some variables:
+
+- The variables SYSTEMC_INCLUDE and SYSTEMC_LIBDIR to give a direct path to
+the SystemC include an library path.
+
+- SYSTEMC_ROOT to set the installation prefix of an installed SystemC library
+
+- SYSTEMC to set the installation prefix of an installed SystemC library
+  (same as above)
+
+- When using Accellera's SystemC with CMake support, a CMake target is
+available that will easen above steps. This will only work if the SystemC
+installation can be found by CMake. This can be configured by setting
+the CMAKE_PREFIX_PATH variable during CMake configuration.
+
+Don't forget to set the same C++ standard for the Verilated sources
+as the SystemC library.
 
 =over 4
 
