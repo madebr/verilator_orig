@@ -1,14 +1,17 @@
-#Simple python example of using the add.sv verilog module.
-#Can be run in python directly, or pytest
+#!/usr/bin/env python3
+
+# Simple python example of using the add.sv verilog module.
+# Can be run in python directly, or pytest
 
 import sys
 import os
-#Search the build directory
+# Search the build directory
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "build"))
 import example
 
-#Example using the verilated module directly
+
 def test_add1():
+    """Example using the Verilated module directly"""
     a = example.Vadd1()
     a.clk = 0
     a.rst = 1
@@ -24,8 +27,9 @@ def test_add1():
     a.eval()
     assert a.result == 6
 
-#Generate a convenience wrapper around the verilated module
+
 def verilator_trace(m):
+    """Generate a convenience wrapper around the Verilated module"""
     class VTrace(m):
         def __init__(self):
             super(VTrace, self).__init__()
@@ -33,7 +37,7 @@ def verilator_trace(m):
             self._timestep = 0
 
         def trace_start(self, filename):
-            if (self._tfp):
+            if self._tfp:
                 self.trace_stop()
             self._timestep = 0
             example.Verilated.traceEverOn(True)
@@ -57,14 +61,16 @@ def verilator_trace(m):
 
     return VTrace
 
-#Wrap add2
-add2 = verilator_trace(example.Vadd2)
 
-#Example using the convenience wrapper
+# Wrap Vadd2 module
+Add2 = verilator_trace(example.Vadd2)
+
+
 def test_add2():
-    a = add2()
+    """Example using the convenience wrapper"""
+    a = Add2()
     # Uncomment to produce trace file
-    #a.trace_start("test_example.vcd")
+    a.trace_start("test_example.vcd")
     a.rst = 1
     a.cycle()
     a.rst = 0
@@ -73,6 +79,7 @@ def test_add2():
     assert a.result == 13
     a.cycle()
     a.trace_stop()
+
 
 if __name__ == "__main__":
     test_add1()

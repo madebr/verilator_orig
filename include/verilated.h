@@ -45,6 +45,23 @@
 # include <thread>
 #endif
 
+#ifdef VL_PYTHON
+#include <cstdarg>
+#ifdef VL_PRINTF
+//#warning "VL_PRINTF was already defined. Undefining..."
+#undef VL_PRINTF
+#endif
+#ifdef VL_VPRINTF
+//#warning "VL_VPRINTF was already defined. Undefining..."
+#undef VL_VPRINTF
+#endif
+namespace vl_py {
+int vl_printf(const char* , ...);
+int vl_vprintf(const char* fmt, va_list args);
+}
+#define VL_PRINTF   ::vl_py::vl_printf
+#define VL_VPRINTF  ::vl_py::vl_vprintf
+#endif
 //=============================================================================
 // Switches
 
@@ -163,6 +180,7 @@ class VerilatedMutex {
 public:
     void lock() {}
     void unlock() {}
+    bool try_lock() { return true; }
 };
 
 /// Empty non-threaded lock guard to avoid #ifdefs in consuming code
@@ -332,7 +350,11 @@ class Verilated {
     // Slow path variables
     static VerilatedMutex m_mutex;  ///< Mutex for s_s/s_ns members, when VL_THREADED
 
-    static VerilatedVoidCb  s_flushCb;  ///< Flush callback function
+    struct VerilatedVoidCb_list {  ///< Struct holding a list of Flush callback functions
+        VerilatedVoidCb cb;                 ///< Flush callback function
+        struct VerilatedVoidCb_list *next;  ///< Pointer to next flush callback function
+    };
+    static VerilatedVoidCb_list* s_flushCb_list;  ///< List of Flush callback functions
 
     static struct Serialized {  // All these members serialized/deserialized
         // Fast path
@@ -445,7 +467,6 @@ public:
     static void commandArgs(int argc, const char** argv) VL_MT_SAFE;
     static void commandArgs(int argc, char** argv) VL_MT_SAFE {
         commandArgs(argc, const_cast<const char**>(argv)); }
-    static void commandArgsAdd(int argc, const char** argv);
     static CommandArgValues* getCommandArgs() VL_MT_SAFE { return &s_args; }
     /// Match plusargs with a given prefix. Returns static char* valid only for a single call
     static const char* commandArgsPlusMatch(const char* prefixp) VL_MT_SAFE;
