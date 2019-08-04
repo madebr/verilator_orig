@@ -2,8 +2,8 @@
 #
 # DESCRIPTION: Verilator Example: Small CMakeLists.txt
 #
-# This is an example cmake script to build a verilog to systemc project
-# using cmake and verilator.
+# This is an example cmake script to build a verilog to SystemC project
+# using CMake and Verilator.
 #
 # Copyright 2003-2019 by Wilson Snyder. This program is free software; you can
 # redistribute it and/or modify it under the terms of either the GNU

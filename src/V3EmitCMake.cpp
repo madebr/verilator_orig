@@ -99,17 +99,18 @@ class CMakeEmitter {
         cmake_set(*of, "PERL", deslash(V3Options::getenvPERL()), "FILEPATH", "Perl executable (from $PERL)");
         cmake_set(*of, "VERILATOR_ROOT", deslash(V3Options::getenvVERILATOR_ROOT()), "PATH" ,"Path to Verilator kit (from $VERILATOR_ROOT)");
 
-        *of << "\n### Switches...\n";
-        *of << "# SystemC output mode?  0/1 (from --sc)\n";
-        cmake_set_raw(*of, "VM_SC", v3Global.opt.systemC() ? "1" : "0");
+        *of << "\n### Compiler flags...\n";
 
         *of << "# User CFLAGS (from -CFLAGS on Verilator command line)\n";
-        cmake_set_raw(*of, "VM_USER_CFLAGS", cmake_list(v3Global.opt.cFlags()));
+        cmake_set_raw(*of, name + "_USER_CFLAGS", cmake_list(v3Global.opt.cFlags()));
 
         *of << "# User LDLIBS (from -LDFLAGS on Verilator command line)\n";
-        cmake_set(*of, "VM_USER_LDLIBS", cmake_list(v3Global.opt.ldLibs()));
+        cmake_set(*of, name + "_USER_LDLIBS", cmake_list(v3Global.opt.ldLibs()));
 
         *of << "\n### Switches...\n";
+
+        *of << "# SystemC output mode?  0/1 (from --sc)\n";
+        cmake_set_raw(*of, name + "_SC", v3Global.opt.systemC() ? "1" : "0");
         *of << "# Coverage output mode?  0/1 (from --coverage)\n";
         cmake_set_raw(*of, name + "_COVERAGE", v3Global.opt.coverage()?"1":"0");
         *of << "# Threaded output mode?  0/1/N threads (from --threads)\n";
@@ -117,7 +118,7 @@ class CMakeEmitter {
         *of << "# Tracing output mode?  0/1 (from --trace)\n";
         cmake_set_raw(*of, name + "_TRACE", v3Global.opt.trace()?"1":"0");
 
-        *of << "\n### Object file lists...\n";
+        *of << "\n### Sources...\n";
         std::vector<string> classes_fast, classes_slow, support_fast, support_slow, global;
         for (AstCFile* nodep = v3Global.rootp()->filesp(); nodep; nodep=VN_CAST(nodep->nextp(), CFile)) {
             if (nodep->source()) {
@@ -163,7 +164,6 @@ class CMakeEmitter {
         if (v3Global.opt.mtasks()) {
             global.push_back("${VERILATOR_ROOT}/include/verilated_threads.cpp");
         }
-
         *of << "# Global classes, need linked once per executable\n";
         cmake_set_raw(*of, name + "_GLOBAL", deslash(cmake_list(global)));
         *of << "# Generated module classes, non-fast-path, compile with low/medium optimization\n";

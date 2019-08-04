@@ -90,8 +90,8 @@ define_property(TARGET
 
 define_property(TARGET
     PROPERTY VERILATOR_SYSTEMC
-    BRIEF_DOCS "Verilator systemc enabled"
-    FULL_DOCS "Verilator systemc enabled"
+    BRIEF_DOCS "Verilator SystemC enabled"
+    FULL_DOCS "Verilator SystemC enabled"
 )
 
 define_property(TARGET
@@ -190,28 +190,28 @@ function(verilate TARGET)
     # Reconfigure if file list has changed (check contents rather than modified time to avoid unnecessary reconfiguration)
     add_custom_command(OUTPUT ${VCMAKE_COPY}
                        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${VCMAKE}" "${VCMAKE_COPY}"
-                       DEPENDS ${VCMAKE})
+                       DEPENDS ${VCMAKE} VERBATIM)
 
     if (${VERILATE_PREFIX}_COVERAGE)
-        #If any verilate() call specifies --coverage, define VM_COVERAGE in the final build
+        # If any verilate() call specifies COVERAGE, define VM_COVERAGE in the final build
         set_property(TARGET ${TARGET} PROPERTY VERILATOR_COVERAGE ON)
     endif()
     get_property(_PROP TARGET ${TARGET} PROPERTY VERILATOR_COVERAGE SET)
 
     if (${VERILATE_PREFIX}_TRACE)
-        #If any verilate() call specifies --trace, define VM_TRACE in the final build
+        # If any verilate() call specifies TRACE, define VM_TRACE in the final build
         set_property(TARGET ${TARGET} PROPERTY VERILATOR_TRACE ON)
     endif()
     get_property(_PROP TARGET ${TARGET} PROPERTY VERILATOR_TRACE SET)
 
-    if (VM_SC)
-        #If any verilate() call specifies --sc, define VM_SC in the final build
+    if (${VERILATE_PREFIX}_SC)
+        # If any verilate() call specifies SYSTEMC, define VM_SC in the final build
         set_property(TARGET ${TARGET} PROPERTY VERILATOR_SYSTEMC ON)
     endif()
     get_property(_PROP TARGET ${TARGET} PROPERTY VERILATOR_SYSTEMC SET)
 
     if (${VERILATE_PREFIX}_THREADS)
-        #If any verilate() call specifies --threads, define VM_THREADED in the final build
+        # If any verilate() call specifies THREADS, define VM_THREADED in the final build
         set_property(TARGET ${TARGET} PROPERTY VERILATOR_THREADED ON)
     endif()
     get_property(_PROP TARGET ${TARGET} PROPERTY VERILATOR_THREADED SET)
@@ -225,14 +225,14 @@ function(verilate TARGET)
 
     # Add the compile flags only on Verilated sources
     foreach(C_SOURCE ${C_OUTPUTS} ${${VERILATE_PREFIX}_GLOBAL})
-        string(REPLACE ";" " " _CFLAGS "${VERILATOR_CFLAGS};${VM_USER_CFLAGS}")
-        set_property(SOURCE "${C_SOURCE}" APPEND PROPERTY COMPILE_FLAGS "${_CFLAGS}")
+        string(REPLACE ";" " " _CFLAGS "${VERILATOR_CFLAGS};${${VERILATE_PREFIX}_USER_CFLAGS}")
+        set_property(SOURCE "${C_SOURCE}" APPEND_STRING PROPERTY COMPILE_FLAGS " ${_CFLAGS} ")
     endforeach()
     foreach(VSLOW ${${VERILATE_PREFIX}_CLASSES_SLOW} ${${VERILATE_PREFIX}_SUPPORT_SLOW})
-        set_property(SOURCE "${VSLOW}" APPEND PROPERTY COMPILE_FLAGS "${VERILATE_OPT_SLOW}")
+        set_property(SOURCE "${VSLOW}" APPEND_STRING PROPERTY COMPILE_FLAGS " ${VERILATE_OPT_SLOW} ")
     endforeach()
     foreach(VFAST ${${VERILATE_PREFIX}_CLASSES_FAST} ${${VERILATE_PREFIX}_SUPPORT_FAST})
-        set_property(SOURCE "${VSLOW}" APPEND PROPERTY COMPILE_FLAGS "${VERILATE_OPT_FAST}")
+        set_property(SOURCE "${VSLOW}" APPEND_STRING PROPERTY COMPILE_FLAGS " ${VERILATE_OPT_FAST} ")
     endforeach()
 
     target_include_directories(${TARGET} PRIVATE "${VERILATOR_ROOT}/include" "${VERILATOR_ROOT}/include/vltstd" "${VDIR}")
@@ -240,38 +240,72 @@ function(verilate TARGET)
         VM_COVERAGE=$<BOOL:$<TARGET_PROPERTY:VERILATOR_COVERAGE>>  VM_SC=$<BOOL:$<TARGET_PROPERTY:VERILATOR_SYSTEMC>>
         VM_TRACE=$<BOOL:$<TARGET_PROPERTY:VERILATOR_TRACE>> $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_THREADED>>:VL_THREADED>)
 
-    if (${VERILATE_PREFIX}_THREADS)
-        string(REPLACE ";" " " _LDFLAGS "${VERILATOR_MT_CFLAGS};${VM_USER_LDLIBS}")
-        set_property(TARGET ${TARGET} APPEND PROPERTY LINK_FLAGS "${_LDFLAGS}")
-        target_compile_features(${TARGET} PRIVATE cxx_std_11)
+    target_link_libraries(${TARGET} PUBLIC "$<$<BOOL:$<TARGET_PROPERTY:VERILATOR_THREADED>>:${VERILATOR_MT_CFLAGS}>")
+    target_link_libraries(${TARGET} PUBLIC "$<$<BOOL:$<TARGET_PROPERTY:VERILATOR_THREADED>>:${${VERILATE_PREFIX}_USER_LDLIBS}>")
+    target_compile_features(${TARGET} PRIVATE $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_THREADED>>:cxx_std_11>)
+endfunction()
+
+function(_verilator_find_systemc)
+    if (NOT TARGET Verilator::systemc)
+        # Find SystemC include file "systemc.h" in the following order:
+        # 1. SYSTEMC_INCLUDE (environment) variable
+        # 2. SYSTEMC_ROOT (environment) variable
+        # 3. SYSTEMC (environment) variable
+        # 4. Use CMake module provided by SystemC installation (eventually requires CMAKE_PREFIX_PATH set)
+
+        find_path(SYSTEMC_INCLUDEDIR NAMES systemc.h
+            HINTS "${SYSTEMC_INCLUDE" ENV SYSTEMC_INCLUDE)
+        find_path(SYSTEMC_INCLUDEDIR NAMES systemc.h
+            HINTS "${SYSTEMC_ROOT" ENV SYSTEMC_ROOT
+            PATH_SUFFIXES include)
+        find_path(SYSTEMC_INCLUDEDIR NAMES systemc.h
+            HINTS "${SYSTEMC" ENV SYSTEMC
+            PATH_SUFFIXES include)
+
+        # Find SystemC library in the following order:
+        # 1. SYSTEMC_LIBDIR (environment) variable
+        # 2. SYSTEMC_ROOT (environment) variable
+        # 3. SYSTEMC (environment) variable
+        # 4. Use CMake module provided by SystemC installation (eventually requires CMAKE_PREFIX_PATH set)
+
+        # Find SystemC using include and library paths
+        find_library(SYSTEMC_LIBRARY NAMES systemc
+            HINTS "${SYSTEMC_LIBDIR}" ENV SYSTEMC_LIBDIR)
+        find_library(SYSTEMC_LIBRARY NAMES systemc
+            HINTS "${SYSTEMC_ROOT}" ENV SYSTEMC_ROOT
+            PATH_SUFFIXES lib)
+        find_library(SYSTEMC_LIBRARY NAMES systemc
+            HINTS "${SYSTEMC}" ENV SYSTEMC
+            PATH_SUFFIXES lib)
+
+        if (SYSTEMC_INCLUDEDIR AND SYSTEMC_LIBRARY)
+            add_library(Verilator::systemc INTERFACE IMPORTED)
+            set_target_properties(Verilator::systemc
+                PROPERTIES
+                    INTERFACE_INCLUDE_DIRECTORIES "${SYSTEMC_INCLUDEDIR}"
+                    INTERFACE_LINK_LIBRARIES "${SYSTEMC_LIBRARY}")
+            return()
+        endif()
+
+        find_package(SystemCLanguage QUIET)
+        if (SystemCLanguage_FOUND)
+            add_library(Verilator::systemc INTERFACE IMPORTED)
+            set_target_properties(Verilator::systemc
+                PROPERTIES
+                    INTERFACE_LINK_LIBRARIES "SystemC::systemc")
+            return()
+        endif()
+
+        message("SystemC not found. This can be fixed by doing either of the following steps:")
+        message("- set the SYSTEMC_INCLUDE and SYSTEMC_LIBDIR (environment) variables; or")
+        message("- set SYSTEMC_ROOT (environment) variable; or")
+        message("- set SYSTEMC (environment) variable; or")
+        message("- use the CMake module of your SystemC installation (may require CMAKE_PREFIX_PATH)")
+        message(FATAL_ERROR "SystemC not found")
     endif()
 endfunction()
 
 function(verilator_link_systemc TARGET)
-    if (NOT TARGET SystemC::systemc)
-        find_package(SystemCLanguage QUIET)
-
-        if (NOT SystemCLanguage_FOUND)
-            # Find SystemC using include and library paths
-            find_path(SYSTEMC_INCLUDE NAMES systemc.h
-                HINTS "${SYSTEMC_ROOT}" ENV SYSTEMC_ROOT
-                PATH_SUFFIXES include)
-            find_library(SYSTEMC_LIBRARY NAMES systemc
-                HINTS "${SYSTEMC_ROOT}" ENV SYSTEMC_ROOT
-                PATH_SUFFIXES lib)
-
-            # Fail if no include or library path is found
-            if(NOT SYSTEMC_INCLUDE OR NOT SYSTEMC_LIBRARY)
-                message(FATAL_ERROR "SystemC was not found: install SystemC with CMake support or set the SYSTEMC_ROOT variable to a SystemC installation")
-            endif()
-
-            add_library(SystemC::systemc INTERFACE IMPORTED)
-            set_target_properties(SystemC::systemc
-                PROPERTIES
-                    INTERFACE_INCLUDE_DIRECTORIES "${SYSTEMC_INCLUDE}"
-                    INTERFACE_LINK_LIBRARIES "${SYSTEMC_LIBRARY}")
-        endif()
-    endif()
-
-    target_link_libraries("${TARGET}" PUBLIC $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_SYSTEMC>>:SystemC::systemc>)
+    _verilator_find_systemc()
+    target_link_libraries("${TARGET}" PUBLIC Verilator::systemc)
 endfunction()
