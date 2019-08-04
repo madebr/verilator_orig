@@ -4,27 +4,20 @@
 // without warranty, 2019 by Wilson Snyder.
 // ======================================================================
 
-// Adds a parameterised constant to an int
+// Increments on each posedge of clk
 
-module add #(
-    parameter integer N = 5
-)(
-    input wire rst,
+module counter(
     input wire clk,
-    input integer value,
-    output integer result,
-    output wire [15:0] out
+    input wire rst,
+    output reg [15:0] out
 );
 
 always @(posedge clk) begin
     if (rst) begin
-        result <= 0;
+        out <= 0;
     end else begin
-        result <= value + N;
+        out <= out + 1;
     end
 end
 
-counter ctr(.clk(clk), .rst(rst), .out(out));
-
 endmodule
-

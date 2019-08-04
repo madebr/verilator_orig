@@ -607,6 +607,15 @@ int main(int argc, char** argv, char** env) {
         v3fatal("verilator: Need --cc, --sc, --cdc, --lint-only, --xml_only or --E option");
     }
 
+    if (v3Global.opt.python()) {
+        if (v3Global.opt.gmake()) {
+            v3fatal("gmake does not support python\n");
+        }
+        if (v3Global.opt.systemC()) {
+            v3fatal("SystemC does not support python\n");
+        }
+    }
+
     // Check environment
     V3Options::getenvSYSTEMC();
     V3Options::getenvSYSTEMC_ARCH();

@@ -1,20 +1,19 @@
+######################################################################
+#
+# DESCRIPTION: Verilator Python Example: CMakeLists.txt
+#
+# This is an example cmake script to build a verilog to Python project
+# using CMake, Verilator and pybind11.
+#
+# Copyright 2003-2019 by Wilson Snyder. This program is free software; you can
+# redistribute it and/or modify it under the terms of either the GNU
+# Lesser General Public License Version 3 or the Perl Artistic License
+# Version 2.0.
+#
+######################################################################
+
 cmake_minimum_required(VERSION 3.8)
-
-#[[
-To build:
-    cd /path/to/verilator/examples/cmake
-    mkdir build
-    cd build
-    cmake ..
-    cmake --build .
-To run:
-    python test_example.py
-Or if you have pytest installed:
-    pytest test_example.py
-]]
-
-cmake_policy(SET CMP0074 NEW)
-project(cmake_example)
+project(cmake_verilator_example)
 
 find_package(verilator HINTS $ENV{VERILATOR_ROOT})
 if (NOT verilator_FOUND)
@@ -30,7 +29,11 @@ if (NOT pybind11_FOUND)
     endif()
 endif()
 
-pybind11_add_module(example pyexample.cpp)
-#Build 2 versions of the verilog with different parameters
-verilate(example NAME Vadd1 SOURCES add.v ARGS -GN=1 --python)
-verilate(example NAME Vadd2 SOURCES add.v ARGS -GN=2 --python TRACE)
+pybind11_add_module(example )
+
+# Build 2 versions of the verilog with different parameters
+verilate(example PREFIX Vadd1 THREADS 4 TOP_MODULE add PYTHON SOURCES add.v VERILATOR_ARGS -GN=1)
+verilate(example PREFIX Vadd2 TOP_MODULE add PYTHON TRACE SOURCES add.v VERILATOR_ARGS -GN=2)
+
+
+target_sources(example PRIVATE pyexample.cpp)

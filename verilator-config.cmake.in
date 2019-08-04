@@ -95,13 +95,19 @@ define_property(TARGET
 )
 
 define_property(TARGET
+    PROPERTY VERILATOR_PYTHON
+    BRIEF_DOCS "Verilator python enabled"
+    FULL_DOCS "Verilator python enabled"
+)
+
+define_property(TARGET
     PROPERTY VERILATOR_THREADED
     BRIEF_DOCS "Verilator multithreading enabled"
     FULL_DOCS "Verilator multithreading enabled"
 )
 
 function(verilate TARGET)
-    cmake_parse_arguments(VERILATE "MAIN;COVERAGE;TRACE;SYSTEMC" "PREFIX;TOP_MODULE;THREADS" "SOURCES;VERILATOR_ARGS;INCLUDE_DIRS;OPT_SLOW;OPT_FAST" ${ARGN})
+    cmake_parse_arguments(VERILATE "MAIN;COVERAGE;TRACE;SYSTEMC;PYTHON" "PREFIX;TOP_MODULE;THREADS" "SOURCES;VERILATOR_ARGS;INCLUDE_DIRS;OPT_SLOW;OPT_FAST" ${ARGN})
     if (NOT VERILATE_SOURCES)
         message(FATAL_ERROR "Need at least one source")
     endif()
@@ -132,6 +138,10 @@ function(verilate TARGET)
         list(APPEND VERILATOR_ARGS --sc)
     else()
         list(APPEND VERILATOR_ARGS --cc)
+    endif()
+
+    if (VERILATE_PYTHON)
+        list(APPEND VERILATOR_ARGS --python)
     endif()
 
     if (VERILATE_MAIN)
@@ -210,6 +220,12 @@ function(verilate TARGET)
     endif()
     get_property(_PROP TARGET ${TARGET} PROPERTY VERILATOR_SYSTEMC SET)
 
+    if (${VERILATE_PREFIX}_PYTHON)
+        # If any verilate() call specifies PYTHON, set C++ standard to 14
+        set_property(TARGET ${TARGET} PROPERTY VERILATOR_PYTHON ON)
+    endif()
+    get_property(_PROP TARGET ${TARGET} PROPERTY VERILATOR_PYTHON SET)
+
     if (${VERILATE_PREFIX}_THREADS)
         # If any verilate() call specifies THREADS, define VM_THREADED in the final build
         set_property(TARGET ${TARGET} PROPERTY VERILATOR_THREADED ON)
@@ -243,6 +259,7 @@ function(verilate TARGET)
     target_link_libraries(${TARGET} PUBLIC "$<$<BOOL:$<TARGET_PROPERTY:VERILATOR_THREADED>>:${VERILATOR_MT_CFLAGS}>")
     target_link_libraries(${TARGET} PUBLIC "$<$<BOOL:$<TARGET_PROPERTY:VERILATOR_THREADED>>:${${VERILATE_PREFIX}_USER_LDLIBS}>")
     target_compile_features(${TARGET} PRIVATE $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_THREADED>>:cxx_std_11>)
+    target_compile_features(${TARGET} PRIVATE $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_PYTHON>>:cxx_std_14>)
 endfunction()
 
 function(_verilator_find_systemc)

@@ -117,6 +117,8 @@ class CMakeEmitter {
         cmake_set_raw(*of, name + "_THREADS", cvtToStr(v3Global.opt.threads()));
         *of << "# Tracing output mode?  0/1 (from --trace)\n";
         cmake_set_raw(*of, name + "_TRACE", v3Global.opt.trace()?"1":"0");
+        *of << "# Python output mode?  0/1 (from --python)\n";
+        cmake_set_raw(*of, name + "_PYTHON", v3Global.opt.python()?"1":"0");
 
         *of << "\n### Sources...\n";
         std::vector<string> classes_fast, classes_slow, support_fast, support_slow, global;
@@ -164,6 +166,10 @@ class CMakeEmitter {
         if (v3Global.opt.mtasks()) {
             global.push_back("${VERILATOR_ROOT}/include/verilated_threads.cpp");
         }
+        if (v3Global.opt.python()) {
+            global.push_back("${VERILATOR_ROOT}/include/verilated_py.cpp");
+        }
+
         *of << "# Global classes, need linked once per executable\n";
         cmake_set_raw(*of, name + "_GLOBAL", deslash(cmake_list(global)));
         *of << "# Generated module classes, non-fast-path, compile with low/medium optimization\n";
