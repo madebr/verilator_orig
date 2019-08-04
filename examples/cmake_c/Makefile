@@ -72,7 +72,7 @@ run:
 	@echo
 
 clean:
-	@rm -rf build
+	@rm -rf build logs
 
 nocmake:
 	@echo
