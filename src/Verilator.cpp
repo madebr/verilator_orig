@@ -606,6 +606,12 @@ int main(int argc, char** argv, char** env) {
         v3fatal("verilator: Need --cc, --sc, --cdc, --lint-only, --xml_only or --E option");
     }
 
+    if (v3Global.opt.python()) {
+        if (v3Global.opt.systemC()) {
+            v3fatal("SystemC does not support python\n");
+        }
+    }
+
     V3Error::abortIfErrors();
 
     // Can we skip doing everything if times are ok?

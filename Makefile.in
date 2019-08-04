@@ -359,7 +359,7 @@ installdata:
 	$(MKINSTALLDIRS) $(DESTDIR)$(pkgdatadir)/examples/tracing_sc
 	$(MKINSTALLDIRS) $(DESTDIR)$(pkgdatadir)/examples/cmake_c
 	$(MKINSTALLDIRS) $(DESTDIR)$(pkgdatadir)/examples/cmake_sc
-	$(MKINSTALLDIRS) $(DESTDIR)$(pkgdatadir)/examples/python
+	$(MKINSTALLDIRS) $(DESTDIR)$(pkgdatadir)/examples/python_cmake
 	cd $(srcdir) \
 	; for p in $(VL_INST_DATA_SRCDIR_FILES) ; do \
 	  $(INSTALL_DATA) $$p $(DESTDIR)$(pkgdatadir)/$$p; \
