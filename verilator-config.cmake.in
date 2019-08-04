@@ -254,12 +254,12 @@ function(_verilator_find_systemc)
         # 4. Use CMake module provided by SystemC installation (eventually requires CMAKE_PREFIX_PATH set)
 
         find_path(SYSTEMC_INCLUDEDIR NAMES systemc.h
-            HINTS "${SYSTEMC_INCLUDE" ENV SYSTEMC_INCLUDE)
+            HINTS "${SYSTEMC_INCLUDE}   " ENV SYSTEMC_INCLUDE)
         find_path(SYSTEMC_INCLUDEDIR NAMES systemc.h
-            HINTS "${SYSTEMC_ROOT" ENV SYSTEMC_ROOT
+            HINTS "${SYSTEMC_ROOT}" ENV SYSTEMC_ROOT
             PATH_SUFFIXES include)
         find_path(SYSTEMC_INCLUDEDIR NAMES systemc.h
-            HINTS "${SYSTEMC" ENV SYSTEMC
+            HINTS "${SYSTEMC}" ENV SYSTEMC
             PATH_SUFFIXES include)
 
         # Find SystemC library in the following order:

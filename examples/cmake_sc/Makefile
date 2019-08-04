@@ -36,21 +36,46 @@ CMAKE_VERSION := $(shell cmake --version | grep -Po '(\d[\.\d]+)')
 CMAKE_MAJOR := $(shell echo $(CMAKE_VERSION) | cut -f1 -d.)
 CMAKE_MINOR := $(shell echo $(CMAKE_VERSION) | cut -f2 -d.)
 CMAKE_GT_3_8 := $(shell [ $(CMAKE_MAJOR) -gt 3 -o \( $(CMAKE_MAJOR) -eq 3 -a $(CMAKE_MINOR) -ge 8 \) ] && echo true)
-ifeq ($(CMAKE_GT_3_8),true)
+ifneq ($(CMAKE_GT_3_8),true)
+TARGET := oldcmake
+else
+
+# Test existence of SYSTEMC_INCLUDE and SYSTEMC_LIBDIR environment variabless
+ifneq (,$(SYSTEMC_INCLUDE))
+ifneq (,${SYSTEMC_LIBDIR})
+SYSTEMC_SET := true
+endif
+endif
+
+# Test existence of SYSTEMC_ROOT environment variable
+ifneq (SYSTEMC_SET, true)
+ifneq (,${SYSTEMC_ROOT})
+SYSTEMC_SET := true
+endif
+endif
+
+# Test existence of SYSTEMC environment variable
+ifneq (SYSTEMC_SET, true)
+ifneq (,${SYSTEMC})
+SYSTEMC_SET := true
+endif
+endif
+
 # Test whether SystemC is installed with CMake support
 # This will print a CMake error about processing arguments that can (currently) be ignored.
+ifneq (SYSTEMC_SET, true)
 FINDSC := $(shell mkdir -p build && cd build && cmake --find-package -DNAME=SystemCLanguage -DCMAKE_USE_PTHREADS_INIT=ON -DCOMPILER_ID=GNU -DLANGUAGE=CXX -DMODE=EXIST -DThreads_FOUND=ON)
 ifneq (,$(findstring SystemCLanguage found,$(FINDSC)))
-TARGET := run
-else
-ifneq (${SYSTEMC_ROOT},)
+SYSTEMC_SET := true
+endif
+endif
+
+ifeq ($(SYSTEMC_SET), true)
 TARGET := run
 else
 TARGET := nosc
 endif
-endif
-else
-TARGET := oldcmake
+
 endif
 endif
 
@@ -97,10 +122,12 @@ oldcmake:
 
 nosc:
 	@echo
-	@echo "%Skip: CMake could not find SystemC."
-	@echo "% Make sure that:"
-	@echo "% - If using the CMake support of SystemC, make sure that the SystemC installation path is in CMAKE_PREFIX_PATH"
-	@echo "% - Else, make sure that the SystemC installation path is in the SYSTEMC_ROOT environment variable"
-	@echo "% - C++ standard of SystemC is the same as this example."
+	@echo "%Skip: SystemC not found"
+	@echo "% Make sure that either:"
+	@echo "% - The environment variables SYSTEMC_INCLUDE and SYSTEMC_LIBDIR are set and exported; or"
+	@echo "% - The environment variable SYSTEMC_ROOT is set; or"
+	@echo "% - The environment variable SYSTEMC is set; or"
+	@echo "% - If the SystemC installation provides CMake support, that its installation prefix is in CMAKE_PREFIX_PATH"
+	@echo "% - C++ standard of the SystemC is the same as this example."
 	@echo "% Please read the CMake section in the Verilator documentation for more information."
 	@echo

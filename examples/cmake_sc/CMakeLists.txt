@@ -42,5 +42,4 @@ verilate(example SYSTEMC COVERAGE TRACE
     VERILATOR_ARGS -f ${CMAKE_CURRENT_SOURCE_DIR}/../tracing_sc/input.vc -O2 -x-assign 0
     SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../tracing_sc/top.v)
 
-target_link_libraries(example PUBLIC SystemC::systemc)
 verilator_link_systemc(example)
