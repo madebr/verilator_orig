@@ -24,7 +24,7 @@
 /// Code available from: http://www.veripool.org/verilator
 ///
 //=========================================================================
-
+
 
 #if VM_SC
 # include "verilated_sc.h"
