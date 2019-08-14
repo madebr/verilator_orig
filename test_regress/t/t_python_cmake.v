@@ -4,9 +4,10 @@
 // without warranty, 2019 by Wilson Snyder.
 // ======================================================================
 
-// Adds a parameterised constant to an int
+// Adds a parameterized constant to an int
 
-module add #(
+
+module add #( /* verilator lint_off DECLFILENAME */
     parameter integer N = 5
 )(
     input wire rst,

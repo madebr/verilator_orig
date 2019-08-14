@@ -13,6 +13,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "obj_d
 
 import Vtop
 
+
 def main():
     # See a similar example walkthrough in the verilator manpage.
     Vtop.Verilated.parse_arguments(sys.argv[1:])
@@ -35,7 +36,7 @@ def main():
     del top
 
     # Fin
-    exit(0);
+    sys.exit(0);
 
 
 if __name__ == "__main__":

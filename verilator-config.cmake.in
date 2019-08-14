@@ -405,7 +405,7 @@ function(verilator_add_python_module TARGET)
             message(FATAL_ERROR "pybind11 not found. Either install it using your system package manager (e.g. conda install pybind11) or download it locally (git clone https://github.com/pybind/pybind11.git).")
         endif()
     endif()
-    pybind11_add_module("${TARGET}")
+    pybind11_add_module("${TARGET}" ${VPYMOD_UNPARSED_ARGUMENTS})
 
     if (VPYMOD_MAIN)
         get_target_property(BINARY_DIR "${TARGET}" BINARY_DIR)
