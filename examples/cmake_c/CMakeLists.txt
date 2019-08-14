@@ -34,5 +34,7 @@ add_executable(example ${CMAKE_CURRENT_SOURCE_DIR}/../tracing_c/sim_main.cpp)
 # Add the verilated circuit to the target
 verilate(example COVERAGE TRACE
     INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../tracing_c"
-    VERILATOR_ARGS -f ${CMAKE_CURRENT_SOURCE_DIR}/../tracing_c/input.vc -O2 -x-assign 0
-    SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../tracing_c/top.v)
+    VERILATOR_ARGS -f ${CMAKE_CURRENT_SOURCE_DIR}/../tracing_c/input.vc -O2 -x-assign 0 -LDFLAGS -Wl,-Map=linking.map -LDFLAGS -Wl,--sort-common=descending
+    OPT_SLOW -O0 -DSLOW OPT_FAST -O3 -DFAST
+    SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../tracing_c/top.v
+)

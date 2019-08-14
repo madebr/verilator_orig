@@ -20,13 +20,10 @@ if (NOT verilator_FOUND)
     message(FATAL_ERROR "Verilator was not found. Either install it, or set the VERILATOR_ROOT environment variable")
 endif()
 
-verilator_add_python_module(example MAIN DOC "An example Python module")
-verilate(example PREFIX Vadd THREADS 4 TOP_MODULE add PYTHON SOURCES add.v VERILATOR_ARGS -GN=1)
+verilator_add_python_module(Vtop MAIN DOC "An example Verilated Python module")
+verilate(Vtop PREFIX Vtop THREADS 4 TOP_MODULE top PYTHON SOURCES top.v)
 
-verilator_add_python_module(example2 MAIN DOC "An example Python module2")
-verilate(example2 PREFIX Vadd TOP_MODULE add PYTHON TRACE SOURCES add.v VERILATOR_ARGS -GN=2)
-
-verilator_add_python_module(example3 MAIN DOC "An example Python module3")
-verilate(example3 PREFIX Vadd TOP_MODULE add PYTHON TRACE_FST SOURCES add.v VERILATOR_ARGS -GN=3)
-verilate(example3 PREFIX Vadd2 TOP_MODULE add PYTHON TRACE SOURCES add.v VERILATOR_ARGS -GN=4
-    OPT_SLOW -O0 -DSLOW OPT_FAST -O3 -DFAST)
+# A Python module can contain multiple Verilated designs
+verilator_add_python_module(example2 MAIN DOC "An example Python module3" EXCLUDE_FROM_ALL)
+verilate(example2 PREFIX Vtop THREADS 4 TOP_MODULE top PYTHON SOURCES top.v)
+verilate(example2 PREFIX Vtop2 THREADS 4 TOP_MODULE top PYTHON SOURCES top.v)

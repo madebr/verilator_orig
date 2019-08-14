@@ -49,6 +49,7 @@ run:
 	python3 sim_main.py
 
 	@echo "-- DONE --------------------"
+	@echo "Note: Once this example is understood, see examples/python_cmake."
 
 ######################################################################
 

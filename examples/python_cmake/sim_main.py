@@ -9,9 +9,10 @@
 import os
 import sys
 # Search the build directory
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "obj_dir"))
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "build"))
 
 import Vtop
+
 
 def main():
     # See a similar example walkthrough in the verilator manpage.
@@ -35,7 +36,7 @@ def main():
     del top
 
     # Fin
-    exit(0);
+    sys.exit(0);
 
 
 if __name__ == "__main__":
