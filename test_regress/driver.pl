@@ -566,6 +566,8 @@ sub new {
         xsim_flags => [split(/\s+/,("--nolog --sv --define XSIM --work $self->{name}=$self->{obj_dir}/xsim"))],
         xsim_flags2 => [],  # Overridden in some sim files
         xsim_run_flags => [split(/\s+/,"--nolog --runall --lib $self->{name}=$self->{obj_dir}/xsim ")],
+        # Python
+        python => 0,
         # Verilator
         vlt => 0,
         vltmt => 0,
@@ -578,6 +580,7 @@ sub new {
         verilator_flags3 => ["--clk clk"],
         verilator_make_gmake => 1,
         verilator_make_cmake => 0,
+        cmake_flags => "",
         verilated_debug => $Opt_Verilated_Debug,
         stdout_filename => undef,  # Redirect stdout
         %$self};
@@ -978,6 +981,11 @@ sub compile {
             return 1;
         }
 
+        if ($param{python} && !$self->have_pybind11) {
+            $self->skip("Python test requires pybind11; ignore error since not available\n");
+            return 1;
+        }
+
         if (!$param{fails} && $param{make_main}) {
             $self->_make_main();
         }
@@ -1018,6 +1026,7 @@ sub compile {
                               "-DCMAKE_PREFIX_PATH=\"".$ENV{SYSTEMC_INCLUDE}."/..;".$ENV{SYSTEMC}."/..\"",
                               "-DTEST_OPT_FAST=\"" . ($param{benchmark}?"-O2":"") . "\"",
                               "-DTEST_VERILATION=\"" . $::Opt_Verilation . "\"",
+                              $param{cmake_flags},
                               ($self->{verbose} ? "--verbose" : ""),
                         ]);
             return 1 if $self->errors || $self->skips || $self->unsupporteds;
@@ -1307,6 +1316,11 @@ sub have_sc {
 
 sub have_cmake {
     return cmake_version() >= version->declare("3.8");
+}
+
+sub have_pybind11 {
+    return 1 if defined $ENV{PYBIND11_ROOT};
+    return 0;
 }
 
 sub cmake_version {

@@ -258,7 +258,8 @@ The directories in the package directory are as follows:
     examples/tracing_sc         => Example Verilog->SystemC with tracing
     examples/cmake_c            => Example building hello_world_c with CMake
     examples/cmake_sc           => Example building hello_world_sc with CMake
-    examples/python             => Example verilog->Python conversion
+    examples/python_cmake       => Example verilog->Python conversion with CMake
+    examples/python_make        => Example verilog->Python conversion with make
     include/                    => Files that should be in your -I compiler path
     include/verilated*.cpp      => Global routines to link into your simulator
     include/verilated*.h        => Global headers

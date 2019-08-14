@@ -49,7 +49,7 @@ run:
 
 	@echo
 	@echo "-- RUN ---------------------"
-	python3 test_example.py
+	python3 sim_main.py
 
 	@echo
 	@echo "-- DONE --------------------"

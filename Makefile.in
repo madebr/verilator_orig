@@ -170,6 +170,8 @@ DISTFILES_INC = $(INFOS) .gitignore \
 	test_regress/t/*.pl \
 	test_regress/t/*.pf \
 	test_regress/t/*.v* \
+	test_regress/t/*.cmake \
+	test_regress/t/*.py \
 
 INST_PROJ_FILES = \
 	bin/verilator \
@@ -360,6 +362,7 @@ installdata:
 	$(MKINSTALLDIRS) $(DESTDIR)$(pkgdatadir)/examples/cmake_c
 	$(MKINSTALLDIRS) $(DESTDIR)$(pkgdatadir)/examples/cmake_sc
 	$(MKINSTALLDIRS) $(DESTDIR)$(pkgdatadir)/examples/python_cmake
+	$(MKINSTALLDIRS) $(DESTDIR)$(pkgdatadir)/examples/python_make
 	cd $(srcdir) \
 	; for p in $(VL_INST_DATA_SRCDIR_FILES) ; do \
 	  $(INSTALL_DATA) $$p $(DESTDIR)$(pkgdatadir)/$$p; \
@@ -390,7 +393,8 @@ uninstall:
 	-rmdir $(DESTDIR)$(pkgdatadir)/examples/tracing_sc
 	-rmdir $(DESTDIR)$(pkgdatadir)/examples/cmake_c
 	-rmdir $(DESTDIR)$(pkgdatadir)/examples/cmake_sc
-	-rmdir $(DESTDIR)$(pkgdatadir)/examples/python
+	-rmdir $(DESTDIR)$(pkgdatadir)/examples/python_cmake
+	-rmdir $(DESTDIR)$(pkgdatadir)/examples/python_make
 	-rmdir $(DESTDIR)$(pkgdatadir)/examples
 	-rmdir $(DESTDIR)$(pkgdatadir)/cmake
 	-rmdir $(DESTDIR)$(pkgdatadir)

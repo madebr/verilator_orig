@@ -1182,7 +1182,8 @@ inlining.  This will also turn off inlining as if all modules had a
 
 This generates a file wraps the toplevel module into a Python module using
 pybind11 (https://github.com/pybind/pybind11). Python support is only available
-for C++ output without SystemC. Also, only CMake is supported.
+for C++ output without SystemC. It is recommended to use CMake to build
+Python modules.
 
 Please read the CMake section for more information.
 
