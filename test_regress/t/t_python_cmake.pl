@@ -16,8 +16,10 @@ compile(
     cmake_flags => "-DTEST_CMAKE_OVERRIDE_SCRIPT=$Self->{t_dir}/t_python_cmake.cmake",
     );
 
-run(logfile => "$Self->{obj_dir}/vlt_python.log",
-    cmd => ["python3 $Self->{t_dir}/t_python_cmake.py $Self->{obj_dir}"]);
+if ($Self->have_pybind11 && $Self->have_cmake) {
+    run(logfile => "$Self->{obj_dir}/vlt_python.log",
+        cmd     => [ "python3 $Self->{t_dir}/t_python_cmake.py $Self->{obj_dir}" ]);
+}
 
 ok(1);
 1;
