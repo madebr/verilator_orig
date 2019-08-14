@@ -34,6 +34,8 @@
 #include <utility>
 #include <vector>
 
+#pragma GCC visibility push(hidden)
+
 namespace py = pybind11;
 
 namespace vl_py {
@@ -468,3 +470,5 @@ void vl_fatal(const char* filename, int linenum, const char* hier, const char* m
     assert(static_cast<bool>(vl_py::s_vl_callback));
     vl_py::s_vl_callback.attr("on_fatal")(filename, linenum, hier, msg);
 }
+
+#pragma GCC visibility pop
