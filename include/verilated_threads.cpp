@@ -93,7 +93,8 @@ void VlWorkerThread::workerLoop() {
             break;
 
         if (VL_UNLIKELY(sleep)) {
-            alarm.waitForNotification();  // ZZZzzzzz
+            VerilatedLockGuard lk(m_mutex);
+            alarm.waitForNotification(m_mutex);  // ZZZzzzzz
             alarm.reset();
         }
         if (VL_LIKELY(work.m_fnp)) {

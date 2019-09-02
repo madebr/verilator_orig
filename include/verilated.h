@@ -156,6 +156,7 @@ class VL_CAPABILITY("mutex") VerilatedMutex {
     void unlock() VL_RELEASE() { m_mutex.unlock(); }
     /// Try to acquire mutex.  Returns true on success, and false on failure.
     bool try_lock() VL_TRY_ACQUIRE(true) { return m_mutex.try_lock(); }
+    friend class VerilatedConditionVariable;
 };
 
 /// Lock guard for mutex (ala std::lock_guard), wrapped to allow -fthread_safety checks
@@ -172,6 +173,23 @@ class VL_SCOPED_CAPABILITY VerilatedLockGuard {
         m_mutexr.unlock();
     }
 };
+
+#include <condition_variable>
+class VerilatedConditionVariable {
+  private:
+    std::condition_variable_any m_cv;
+  public:
+    VerilatedConditionVariable() : m_cv() {
+    }
+    template <typename Predicate>
+    void wait(VerilatedMutex &m, Predicate &&p) {
+        m_cv.wait(m.m_mutex, std::forward<Predicate>(p));
+    }
+    void notify() {
+        m_cv.notify_all();
+    }
+};
+
 
 #else  // !VL_THREADED
 

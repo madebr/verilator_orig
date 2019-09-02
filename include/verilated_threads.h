@@ -41,6 +41,7 @@ class VlNotification {
     // MEMBERS
     std::atomic<bool> m_notified;  // Notification pending
     static std::atomic<vluint64_t> s_yields;  // Statistics
+    VerilatedConditionVariable m_cv;
 
 public:
     // CONSTRUCTORS
@@ -63,14 +64,15 @@ public:
     // This is logically const: the object will remain in notified state
     // after WaitForNotification() returns, so you could notify more than
     // one thread of the same event.
-    inline void waitForNotification() {
+    inline void waitForNotification(VerilatedMutex &m) {
         unsigned ct = 0;
         while (VL_UNLIKELY(!notified())) {
             VL_CPU_RELAX();
             ++ct;
             if (VL_UNLIKELY(ct > VL_LOCK_SPINS)) {
+                m_cv.wait(m, [&]{return notified();});
                 ct = 0;
-                yieldThread();
+                //yieldThread();
             }
         }
     }
@@ -89,6 +91,7 @@ public:
     // it remains so.
     inline void notify() {
         m_notified.store(true, std::memory_order_release);
+        m_cv.notify();
     }
     // Reset the state to un-notified state, which is also the
     // state of a new Notification object.
