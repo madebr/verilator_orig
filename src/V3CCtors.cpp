@@ -60,7 +60,7 @@ public:
         }
         if (!m_funcp) {
             m_funcp = new AstCFunc(m_modp->fileline(),
-                                   m_basename+"_"+cvtToStr(++m_funcNum), NULL, "void");
+                                   m_basename+"_"+cvtToStr(++m_funcNum), NULL);
             m_funcp->isStatic(false);
             m_funcp->declPrivate(true);
             m_funcp->slow(true);
@@ -87,7 +87,7 @@ public:
         m_modp = nodep;
         m_numStmts = 0;
         m_funcNum = 0;
-        m_tlFuncp = new AstCFunc(nodep->fileline(), basename, NULL, "void");
+        m_tlFuncp = new AstCFunc(nodep->fileline(), basename, NULL);
         m_tlFuncp->declPrivate(true);
         m_tlFuncp->isStatic(false);
         m_tlFuncp->slow(true);
@@ -107,7 +107,7 @@ private:
 
 void V3CCtors::evalAsserts() {
     AstNodeModule* modp = v3Global.rootp()->modulesp();  // Top module wrapper
-    AstCFunc* funcp = new AstCFunc(modp->fileline(), "_eval_debug_assertions", NULL, "void");
+    AstCFunc* funcp = new AstCFunc(modp->fileline(), "_eval_debug_assertions", NULL);
     funcp->declPrivate(true);
     funcp->isStatic(false);
     funcp->slow(false);

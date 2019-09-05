@@ -73,7 +73,7 @@ public:
         if (!m_chgFuncp || v3Global.opt.outputSplitCFuncs() < m_numStmts) {
             m_chgFuncp = new AstCFunc(m_scopetopp->fileline(),
                                       "_change_request_" + cvtToStr(++m_funcNum),
-                                      m_scopetopp, "QData");
+                                      m_scopetopp, AstBasicDTypeKwd::UINT64);
             m_chgFuncp->argTypes(EmitCBaseVisitor::symClassVar());
             m_chgFuncp->symProlog(true);
             m_chgFuncp->declPrivate(true);
@@ -266,7 +266,7 @@ private:
 
         // Create a wrapper change detection function that calls each change detection function
         m_statep->m_tlChgFuncp = new AstCFunc(nodep->fileline(),
-                                              "_change_request", scopep, "QData");
+                                              "_change_request", scopep, AstBasicDTypeKwd::UINT64);
         m_statep->m_tlChgFuncp->argTypes(EmitCBaseVisitor::symClassVar());
         m_statep->m_tlChgFuncp->symProlog(true);
         m_statep->m_tlChgFuncp->declPrivate(true);

@@ -5938,10 +5938,11 @@ private:
     AstScope*   m_scopep;
     string      m_name;
     string      m_cname;                // C name, for dpiExports
-    string      m_rtnType;              // void, bool, or other return type
+    string      m_rtnTypeString;        // String representation of return type
     string      m_argTypes;
     string      m_ifdef;                // #ifdef symbol around this function
     VBoolOrUnknown m_isStatic;          // Function is declared static (no this)
+    AstBasicDTypeKwd m_rtnType;         // Return type
     bool        m_dontCombine:1;        // V3Combine shouldn't compare this func tree, it's special
     bool        m_skipDecl:1;           // Don't declare it
     bool        m_declPrivate:1;        // Declare it private
@@ -5958,13 +5959,14 @@ private:
     bool        m_dpiImport:1;          // From dpi import
     bool        m_dpiImportWrapper:1;   // Wrapper from dpi import
 public:
-    AstCFunc(FileLine* fl, const string& name, AstScope* scopep, const string& rtnType="")
+    AstCFunc(FileLine* fl, const string& name, AstScope* scopep, AstBasicDTypeKwd rtnType=AstBasicDTypeKwd::VOID, const string& rtnTypeString="")
         : AstNode(fl) {
         m_funcType = AstCFuncType::FT_NORMAL;
         m_isStatic = VBoolOrUnknown::BU_UNKNOWN;  // Unknown until see where thisp needed
         m_scopep = scopep;
         m_name = name;
         m_rtnType = rtnType;
+        m_rtnTypeString = rtnTypeString;
         m_dontCombine = false;
         m_skipDecl = false;
         m_declPrivate = false;
@@ -5991,6 +5993,7 @@ public:
         const AstCFunc* asamep = static_cast<const AstCFunc*>(samep);
         return ((funcType() == asamep->funcType())
                 && (rtnTypeVoid() == asamep->rtnTypeVoid())
+                && (rtnType() == asamep->rtnType())
                 && (argTypes() == asamep->argTypes())
                 && (!(dpiImport() || dpiExport())
                     || name() == asamep->name())); }
@@ -6004,7 +6007,8 @@ public:
     string cname() const { return m_cname; }
     AstScope* scopep() const { return m_scopep; }
     void scopep(AstScope* nodep) { m_scopep = nodep; }
-    string rtnTypeVoid() const { return ((m_rtnType=="") ? "void" : m_rtnType); }
+    AstBasicDTypeKwd rtnType() const { return m_rtnType; }
+    string rtnTypeVoid() const { return (m_rtnTypeString!="") ? m_rtnTypeString : m_rtnType.ascii(); }
     bool dontCombine() const { return m_dontCombine || funcType()!=AstCFuncType::FT_NORMAL; }
     void dontCombine(bool flag) { m_dontCombine = flag; }
     bool dontInline() const { return dontCombine() || slow() || skipDecl() || funcPublic(); }

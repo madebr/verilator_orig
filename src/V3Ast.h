@@ -357,6 +357,8 @@ public:
         UINT32, UINT64,
         // Internal types, eliminated after parsing
         LOGIC_IMPLICIT,
+        // Internal types
+        VOID,
         // Leave last
         _ENUM_MAX
     };
@@ -370,6 +372,7 @@ public:
             "VerilatedScope*", "char*",
             "IData", "QData",
             "LOGIC_IMPLICIT",
+            "void",
             " MAX"
         };
         return names[m_e];
@@ -383,6 +386,7 @@ public:
             "dpiScope", "const char*",
             "IData", "QData",
             "svLogic",  // Though shouldn't be needed
+            "void",
             " MAX"
         };
         return names[m_e];

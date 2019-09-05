@@ -706,6 +706,7 @@ private:
         AstCFunc* dpip = new AstCFunc(nodep->fileline(),
                                       nodep->cname(),
                                       m_scopep,
+                                      (rtnvarp ? rtnvarp->declKwd() : AstBasicDTypeKwd(AstBasicDTypeKwd::VOID)),
                                       (rtnvarp ? rtnvarp->dpiArgType(true, true) : ""));
         dpip->dontCombine(true);
         dpip->entryPoint(true);
@@ -825,6 +826,11 @@ private:
         AstCFunc* dpip = new AstCFunc(nodep->fileline(),
                                       nodep->cname(),
                                       m_scopep,
+                                      (rtnvarp ? rtnvarp->declKwd()
+                                       // Tasks (but not void functions)
+                                       // return bool indicating disabled
+                                       : nodep->dpiTask() ? AstBasicDTypeKwd(AstBasicDTypeKwd::INT)
+                                       : AstBasicDTypeKwd(AstBasicDTypeKwd::VOID)),
                                       (rtnvarp ? rtnvarp->dpiArgType(true, true)
                                        // Tasks (but not void functions)
                                        // return bool indicating disabled
@@ -1046,6 +1052,9 @@ private:
         AstCFunc* cfuncp = new AstCFunc(nodep->fileline(),
                                         prefix + nodep->name() + suffix,
                                         m_scopep,
+                                        ((nodep->taskPublic() && rtnvarp)
+                                         ? rtnvarp->declKwd()
+                                         : AstBasicDTypeKwd(AstBasicDTypeKwd::VOID)),
                                         ((nodep->taskPublic() && rtnvarp)
                                          ? rtnvarp->cPubArgType(true, true)
                                          : ""));
