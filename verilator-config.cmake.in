@@ -125,6 +125,12 @@ define_property(TARGET
 )
 
 define_property(TARGET
+    PROPERTY VERILATOR_DPI
+    BRIEF_DOCS "DPI enabled"
+    FULL_DOCS "DPI enabled"
+)
+
+define_property(TARGET
     PROPERTY VERILATOR_PYTHON
     BRIEF_DOCS "Verilator python enabled"
     FULL_DOCS "Verilator python enabled"
@@ -280,6 +286,11 @@ function(verilate TARGET)
         set_property(TARGET ${TARGET} PROPERTY VERILATOR_SYSTEMC ON)
     endif()
 
+    if (${VERILATE_PREFIX}_DPI)
+        # If any verilate() call requires DPI, define VM_DPI in the final build
+        set_property(TARGET ${TARGET} PROPERTY VERILATOR_DPI ON)
+    endif()
+
     if (${VERILATE_PREFIX}_PYTHON)
         # If any verilate() call specifies PYTHON, pass appropriate compile flags and set C++ standard to 14
         set_property(TARGET ${TARGET} PROPERTY VERILATOR_PYTHON ON)
@@ -318,6 +329,7 @@ function(verilate TARGET)
         $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_THREADED>>:VL_THREADED>
         VM_TRACE_VCD=$<BOOL:$<TARGET_PROPERTY:VERILATOR_TRACE_VCD>>
         VM_TRACE_FST=$<BOOL:$<TARGET_PROPERTY:VERILATOR_TRACE_FST>>
+        $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_DPI>>:VL_DPI>
         $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_PYTHON>>:VL_PYTHON>
     )
 

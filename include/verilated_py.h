@@ -39,8 +39,6 @@
 
 #include <cstdarg>
 
-namespace py = pybind11;
-
 namespace vl_py {
 
 void declare_globals(pybind11::module& m);
@@ -50,9 +48,9 @@ int vl_printf(const char* , ...);
 int vl_vprintf(const char* fmt, va_list args);
 
 namespace impl {
-py::int_ read_port(const vluint32_t* words, size_t width, bool is_signed);
+pybind11::int_ read_port(const vluint32_t* words, size_t width, bool is_signed);
 
-void write_port(vluint32_t* words, size_t width, py::int_ v, bool is_signed);
+void write_port(vluint32_t* words, size_t width, pybind11::int_ v, bool is_signed);
 
 template <typename T, bool is_signed>
 struct port_type;
@@ -89,7 +87,7 @@ struct port_type<T, false> {
         return r; \
     }
 #define _VL_PY_PORT_WRITE(n, p, msb, lsb, s) \
-    [](n& module, py::int_ value) { \
+    [](n& module, pybind11::int_ value) { \
         if (!s) { \
             if (_PyLong_Sign(value.ptr()) < 0) {\
                 throw std::invalid_argument("Cannot assign a negative value to an unsigned port"); return; \
@@ -97,14 +95,14 @@ struct port_type<T, false> {
         } \
         module.p = static_cast<::vl_py::impl::port_type<decltype(n::p), s>::type>(value); \
         if (PyErr_Occurred()) { \
-            throw py::error_already_set(); \
+            throw pybind11::error_already_set(); \
         } \
     }
 
 #define _VL_PY_PORT_READ_W(n, p, msb, lsb, s) \
     [](const n& module) {return ::vl_py::impl::read_port(module.p, _VL_PY_ABS(msb-lsb), s);}
 #define _VL_PY_PORT_WRITE_W(n, p, msb, lsb, s) \
-    [](n& module, py::int_ value) { \
+    [](n& module, pybind11::int_ value) { \
         if (!s) { \
             if (_PyLong_Sign(value.ptr()) < 0) {\
                 throw std::invalid_argument("Cannot assign a negative value to an unsigned port"); return; \
@@ -113,7 +111,7 @@ struct port_type<T, false> {
         ::vl_py::impl::write_port(module.p, _VL_PY_ABS(msb-lsb), value, s);; \
     }
 
-#define VL_PY_MODULE(m, t) pybind11::class_<t, VerilatedModule>(m, #t, py::module_local{}) \
+#define VL_PY_MODULE(m, t) pybind11::class_<t, VerilatedModule>(m, #t, pybind11::module_local{}) \
                             .def(pybind11::init<const char*>(), pybind11::arg("name") = #t)
 
 #define VL_PY_INPORT(n, p, msb, lsb, s) .def_property(#p, _VL_PY_PORT_READ(n, p, msb, lsb, s), _VL_PY_PORT_WRITE(n, p, msb, lsb, s))

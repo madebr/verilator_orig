@@ -30,11 +30,10 @@
 #include <cstdarg>
 #include <cstdint>
 #include <exception>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
-
-#pragma GCC visibility push(hidden)
 
 namespace py = pybind11;
 
@@ -72,6 +71,8 @@ void write_port(vluint32_t* words, size_t width, py::int_ v, bool is_signed) {
     }
 }
 } // namespace impl
+
+double s_time_stamp;
 
 py::object s_pymodule;
 
@@ -195,7 +196,6 @@ static void set_callback(py::module m, py::object obj) {
     }
 }
 
-
 namespace impl {
 
 struct {
@@ -232,6 +232,8 @@ void declare_globals(py::module& m) {
             ex(e.what());
         }
     });
+
+    m.def("set_time_stamp", [](double time) {s_time_stamp = time;}, py::arg("time"));
 
     py::class_<VLCallback, PyVLCallback, std::shared_ptr<VLCallback>> vl_class_callback(m, "VerilatedCallback", py::module_local{});
     vl_class_callback
@@ -420,6 +422,109 @@ void declare_globals(py::module& m) {
             "Set time resolution (s/ms, defaults to ns)\n"
             "See also VL_TIME_PRECISION, and VL_TIME_MULTIPLIER in verilated.h");
 #endif
+#ifdef VL_DPI
+    //FIXME: test this Python class
+    py::class_<vl_py::svBitVecValWrapper> vl_class_svBitVecVal(m, "svBitVecVal", py::module_local{});
+    vl_class_svBitVecVal
+        .def(py::init<size_t>())
+        .def(py::init<std::string>())
+        .def("get_bit",
+            [](const svBitVecValWrapper &vec, size_t index) {
+                char c = vec.getBitChar(index);
+                return std::string(1, c);
+            }, py::arg("index"), "Get the bit at position")
+        .def("set_bit",
+            [](svBitVecValWrapper &vec, size_t index, bool bbit) { vec.setBit(index, bbit ? sv_1 : sv_0); },
+            py::arg("index"), py::arg("bit"), "Set the bit at position.")
+        .def("set_bit",
+            [](svBitVecValWrapper &vec, size_t index, const std::string &sbit) {
+                if (sbit.size() != 1) {
+                    throw std::invalid_argument("String must be of size 1");
+                }
+                vec.setBitChar(index, sbit[0]);
+            },
+            py::arg("index"), py::arg("bit"), "Set the bit at position.")
+        .def("set_bits",
+            [](svBitVecValWrapper &vec, const std::string& s) { vec.setBitChars(s); },
+            py::arg("bits"), "Set the bits.")
+        .def("__invert__", &svBitVecValWrapper::invert, "Invert all bits of the bit vector")
+        .def("__getitem__", [](const svBitVecValWrapper &vec, size_t idx) {
+            return vec.getBit(idx) == sv_1;}, "Get the bit at index as a boolean")
+        .def("__getitem__", [](const svBitVecValWrapper &vec, py::slice slice) {
+            size_t start, stop, step, sliceLength;
+            if (slice.compute(vec.width(), &start, &stop, &step, &sliceLength) == -1) {
+                py::print("slice.compute returned an error");
+                throw py::error_already_set{};
+            }
+            return vec.subVector(start, stop, step, sliceLength);}, "Get the bits at the slice as a bit vector")
+        .def("__setitem__", [](svBitVecValWrapper &vec, size_t idx, bool val) {
+            svBit b = val ? sv_1 : sv_0; vec.setBit(idx, val ? sv_1 : sv_0); return b;}, "Set the bit at index")
+        .def("__len__", &svBitVecValWrapper::width, "Get the width of the bit vector")
+        .def("__int__", [](const svBitVecValWrapper &vec) { return pybind11::handle(PyLong_FromString(vec.str().c_str(), nullptr, 2)); }, "Get the int representation of the bit vector")
+        .def("__bool__", [](const svBitVecValWrapper &vec) { return vec.isNonZero(); }, "Check wheter at least one bit in the vector is 1")
+        .def("bitstr", &svBitVecValWrapper::str, "Get the string representation of the bit vector")
+        .def("__repr__", [](const vl_py::svBitVecValWrapper &vec) {
+            return "<svBitVecVal:"+vec.str()+">";
+        })
+        .def("__eq__", [](const svBitVecValWrapper& vec1, const svBitVecValWrapper& vec2) {
+                return vec1 == vec2;});
+    py::class_<vl_py::svLogicVecValWrapper> vl_class_svLogicVecVal(m, "svLogicVecVal", py::module_local{});
+    vl_class_svLogicVecVal
+        .def(py::init<size_t>())
+        .def(py::init<std::string>())
+        .def("get_logic",
+            [](const svLogicVecValWrapper &vec, size_t index) {
+                char c = vec.getLogicChar(index);
+                return std::string(1, c);
+            }, py::arg("index"), "Get the logic at position")
+        .def("set_logic",
+            [](svLogicVecValWrapper &vec, size_t index, bool blogic) { vec.setLogic(index, blogic ? sv_1 : sv_0); },
+            py::arg("index"), py::arg("logic"), "Set the logic at position.")
+        .def("set_logic",
+            [](svLogicVecValWrapper &vec, size_t index, const std::string &slogic) {
+                if (slogic.size() != 1) {
+                    throw std::invalid_argument("String must be of size 1");
+                }
+                vec.setLogicChar(index, slogic[0]);
+            },
+            py::arg("index"), py::arg("logic"), "Set the logic at position.")
+        .def("__invert__", &svLogicVecValWrapper::invert, "Invert all bits of the logic vector")
+        .def("__getitem__", [](const svLogicVecValWrapper &vec, py::slice slice) {
+            size_t start, stop, step, sliceLength;
+            if (slice.compute(vec.width(), &start, &stop, &step, &sliceLength) == -1) {
+                py::print("slice.compute returned an error");
+                throw py::error_already_set{};
+            }
+            return vec.subVector(start, stop, step, sliceLength);}, "Get the bits at the slice as a logic vector")
+        .def("__len__", &svLogicVecValWrapper::width, "Get the width of the logic vector")
+        .def("logicstr", &svLogicVecValWrapper::str, "Get the string representation of the logic vector")
+        .def("__repr__", [](vl_py::svLogicVecValWrapper &vec) {
+            return "<svLogicVecVal:"+vec.str()+">";
+        })
+        .def("__eq__", [](const svLogicVecValWrapper& vec1, const svLogicVecValWrapper& vec2) {
+                return vec1 == vec2;});
+    py::class_<svScopeWrapper>(m, "svScope", py::module_local{})
+        .def_static("from_name", [](const std::string& name) {
+                svScope scope = svGetScopeFromName(name.c_str());
+                if (!scope) {
+                    throw std::runtime_error("Scope '"+name+"' not found");
+                }
+                return svScopeWrapper{scope};})
+        .def("__repr__", [](const svScopeWrapper& wrapper) {
+                std::ostringstream oss;
+                oss << "<svScope:0x" << std::hex << wrapper.scope << ">";
+                return oss.str();})
+        .def_property_readonly("name", [](const svScopeWrapper& wrapper) {
+                return svGetNameFromScope(wrapper.scope);})
+        .def("__eq__", [](const svScopeWrapper& wrapper1, const svScopeWrapper& wrapper2) {
+                return wrapper1.scope == wrapper2.scope;});
+    py::class_<BaseDpiMetaClass, std::shared_ptr<BaseDpiMetaClass>>(m, "BaseDpiMetaClass", py::module_local{})
+        .def(py::init<>())
+        .def("get_caller_info", &BaseDpiMetaClass::getCallerInfo, "Get the file and location of the caller")
+        .def("get_current_scope", &BaseDpiMetaClass::getCurrentScope, "Get the current scope")
+        .def("set_current_scope", &BaseDpiMetaClass::setCurrentScope, "Set the current scope")
+        .def_static("get_dpi_version", &BaseDpiMetaClass::getDpiVersion, "Get the DPI version");
+#endif
 
 #if VM_COVERAGE
     py::class_<VerilatedCov> vl_class_coverage(m, "VerilatedCov", py::module_local{});
@@ -479,4 +584,6 @@ void vl_fatal(const char* filename, int linenum, const char* hier, const char* m
     vl_py::s_vl_callback.attr("on_fatal")(filename, linenum, hier, msg);
 }
 
-#pragma GCC visibility pop
+double sc_time_stamp() {
+    return vl_py::s_time_stamp;
+}

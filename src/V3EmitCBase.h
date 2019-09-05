@@ -73,7 +73,7 @@ public:
         v3Global.rootp()->addFilesp(cfilep);
         return cfilep;
     }
-    string cFuncArgs(const AstCFunc* nodep) {
+    static string cFuncArgs(const AstCFunc* nodep) {
         // Return argument list for given C function
         string args = nodep->argTypes();
         // Might be a user function with argument list.

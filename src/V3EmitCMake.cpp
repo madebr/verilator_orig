@@ -122,6 +122,8 @@ class CMakeEmitter {
         cmake_set_raw(*of, name + "_TRACE_VCD", (v3Global.opt.trace() && (v3Global.opt.traceFormat() == TraceFormat::VCD))?"1":"0");
         *of << "# FST Tracing output mode? 0/1 (from --fst-trace)\n";
         cmake_set_raw(*of, name + "_TRACE_FST", (v3Global.opt.trace() && (v3Global.opt.traceFormat() != TraceFormat::VCD)) ? "1":"0");
+        *of << "# DPI enabled?  0/1 (using DPI-C import or export in modules)\n";
+        cmake_set_raw(*of, name + "_DPI", v3Global.dpi()?"1":"0");
         *of << "# Python output mode?  0/1 (from --python)\n";
         cmake_set_raw(*of, name + "_PYTHON", v3Global.opt.python()?"1":"0");
 
