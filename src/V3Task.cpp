@@ -958,6 +958,12 @@ private:
             cfuncp->addStmtsp(new AstCStmt(nodep->fileline(), stmt));
         }
 
+        // Clear context, if needed
+        if (nodep->dpiContext()) {
+            string stmt = "Verilated::dpiClearContext();\n";
+            cfuncp->addStmtsp(new AstCStmt(nodep->fileline(), stmt));
+        }
+
         // Convert output/inout arguments back to internal type
         for (AstNode* stmtp = cfuncp->argsp(); stmtp; stmtp=stmtp->nextp()) {
             if (AstVar* portp = VN_CAST(stmtp, Var)) {
