@@ -836,6 +836,7 @@ private:
         dpip->isStatic(false);
         dpip->protect(false);
         dpip->pure(nodep->pure());
+        dpip->context(nodep->dpiContext());
         dpip->dpiImport(true);
         // Add DPI reference to top, since it's a global function
         m_topScopep->scopep()->addActivep(dpip);
@@ -1057,6 +1058,7 @@ private:
         cfuncp->dpiImportWrapper(nodep->dpiImport());
         cfuncp->isStatic(!(nodep->dpiImport()||nodep->taskPublic()));
         cfuncp->pure(nodep->pure());
+        cfuncp->context(nodep->dpiContext());
         //cfuncp->dpiImport   // Not set in the wrapper - the called function has it set
         if (cfuncp->dpiExport()) cfuncp->cname(nodep->cname());
 

@@ -5952,6 +5952,7 @@ private:
     bool        m_symProlog:1;          // Setup symbol table for later instructions
     bool        m_entryPoint:1;         // User may call into this top level function
     bool        m_pure:1;               // Pure function
+    bool        m_context:1;            // Context function
     bool        m_dpiExport:1;          // From dpi export
     bool        m_dpiExportWrapper:1;   // From dpi export; static function with dispatch table
     bool        m_dpiImport:1;          // From dpi import
@@ -5974,6 +5975,7 @@ public:
         m_symProlog = false;
         m_entryPoint = false;
         m_pure = false;
+        m_context = false;
         m_dpiExport = false;
         m_dpiExportWrapper = false;
         m_dpiImport = false;
@@ -6030,6 +6032,8 @@ public:
     void entryPoint(bool flag) { m_entryPoint = flag; }
     bool pure() const { return m_pure; }
     void pure(bool flag) { m_pure = flag; }
+    bool context() const { return m_context; }
+    void context(bool flag) { m_context = flag; }
     bool dpiExport() const { return m_dpiExport; }
     void dpiExport(bool flag) { m_dpiExport = flag; }
     bool dpiExportWrapper() const { return m_dpiExportWrapper; }
