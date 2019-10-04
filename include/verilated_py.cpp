@@ -421,6 +421,21 @@ void declare_globals(py::module& m) {
             "See also VL_TIME_PRECISION, and VL_TIME_MULTIPLIER in verilated.h");
 #endif
 
+#if VM_COVERAGE
+    py::class_<VerilatedCov> vl_class_coverage(m, "VerilatedCov", py::module_local{});
+    vl_class_coverage
+        .def_static("write", &VerilatedCov::write,
+            py::arg("filename"),
+            "Write out coverage data to specified file")
+        .def_static("clear", &VerilatedCov::clear,
+            "Clear coverage points (and call delete on all items)")
+        .def_static("clearNonMatch", &VerilatedCov::clearNonMatch,
+            py::arg("match"),
+            "Clear items not matching the provided string")
+        .def_static("zero", &VerilatedCov::zero,
+            "Zero coverage points");
+#endif
+
     set_callback(m, py::none());
     m.add_object("_cleanup", py::capsule([]() {
         // vl_callback must not be removed from flushCb because

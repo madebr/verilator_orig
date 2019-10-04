@@ -30,6 +30,9 @@
 #if VM_TRACE_FST
 #include "verilated_fst_c.h"
 #endif
+#if VM_COVERAGE
+#include "verilated_cov.h"
+#endif
 #include "verilatedos.h"
 
 #include <pybind11/pybind11.h>
