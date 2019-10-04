@@ -290,7 +290,7 @@ def test_example2_vadd():
     example2.Verilated.set_callback(None)
 
     a = Add2()
-    a.trace_start("test_example.vcd")
+    a.trace_start(os.path.join(sys.argv[1], "simx.vcd"))
     a.rst = 1
     a.cycle()
     a.rst = 0
@@ -305,7 +305,6 @@ def test_example2_vadd():
     except example2.VerilatedException as e:
         print("An exception was thrown: {}".format(repr(e)))
     a.trace_stop()
-    os.unlink("test_example.vcd")
 
 
 def test_multiple_python_modules_independence():

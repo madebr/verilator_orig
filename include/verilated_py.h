@@ -77,7 +77,14 @@ struct port_type<T, false> {
 #define _VL_PY_ABS(X) ((X)>=0?(X):-(X))
 
 #define _VL_PY_PORT_READ(n, p, msb, lsb, s) \
-    [](n& module) { return static_cast<::vl_py::impl::port_type<decltype(n::p), s>::type>(module.p);}
+    [](n& module) { \
+        auto r = static_cast<::vl_py::impl::port_type<decltype(n::p), s>::type>(module.p); \
+        if (s) { /* Sign extend */ \
+            struct { decltype(r) v : _VL_PY_ABS(msb-lsb); } sxt { r }; \
+            return sxt.v; \
+        } \
+        return r; \
+    }
 #define _VL_PY_PORT_WRITE(n, p, msb, lsb, s) \
     [](n& module, py::int_ value) { \
         if (!s) { \
