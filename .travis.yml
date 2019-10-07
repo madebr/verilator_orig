@@ -6,6 +6,9 @@
 
 language: cpp
 
+env:
+  - PYBIND11_ROOT=/usr
+
 matrix:
   include:
 # Non-cron build will just run on whatever linux flavor we get
@@ -93,6 +96,7 @@ addons:
   apt:
     packages:
       - gdb
+      - pybind11-dev
 
 before_install:
 # Perl modules needed for testing
