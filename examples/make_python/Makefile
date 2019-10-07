@@ -40,7 +40,7 @@ run:
 	@echo "PYBIND11_ROOT is $(PYBIND11_ROOT)"
 
 	@echo "-- VERILATE ----------------"
-	$(VERILATOR) -cc --python --make gmake top.v pymain.cpp
+	$(VERILATOR) -cc --python --make gmake top.v
 
 	@echo "-- COMPILE -----------------"
 	$(MAKE) -j 4 -C obj_dir -f Vtop.mk
@@ -49,7 +49,6 @@ run:
 	python3 sim_main.py
 
 	@echo "-- DONE --------------------"
-	@echo "Note: Once this example is understood, see examples/python_cmake."
 
 ######################################################################
 

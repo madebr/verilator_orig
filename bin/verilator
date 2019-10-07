@@ -1230,8 +1230,9 @@ better performing.
 
 This generates a file wraps the toplevel module into a Python module using
 pybind11 (https://github.com/pybind/pybind11). Python support is only available
-for C++ output without SystemC. It is recommended to use CMake to build
-Python modules.
+for C++ output, not SystemC. The CMake build system is preferred if you
+want to combine multiple verilator modules or add your own C++ code to the
+python module.
 
 Please read the CMake section for more information.
 

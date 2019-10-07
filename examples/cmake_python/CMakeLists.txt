@@ -13,7 +13,7 @@
 ######################################################################
 
 cmake_minimum_required(VERSION 3.8)
-project(python_cmake_example)
+project(cmake_python_example)
 
 find_package(verilator HINTS $ENV{VERILATOR_ROOT} ${VERILATOR_ROOT})
 if (NOT verilator_FOUND)
