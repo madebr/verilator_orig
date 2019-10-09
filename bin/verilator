@@ -2424,21 +2424,20 @@ as the build system.
 
 Verilator can be run using CMake, which takes care of both running
 Verilator and compiling the output. There is a CMake example in the
-examples/ directory. The following is a minimal CMakeLists.txt:
+examples/ directory. The following is a minimal CMakeLists.txt that
+would build the code listed in "EXAMPLE C++ EXECUTION":
 
     project(cmake_example)
     find_package(verilator HINTS $ENV{VERILATOR_ROOT})
-    add_executable(example main.cpp)
-    verilate(example SOURCES top.v)
+    add_executable(Vour sim_main.cpp)
+    verilate(Vour SOURCES our.v)
 
 find_package will automatically find an installed copy of Verilator, or use
 a local build if VERILATOR_ROOT is set.
 
 It is recommended to use CMake >= 3.12 and the Ninja generator, though
-other combinations should work. If you use the Makefile generator you may
-need to run 'make' twice after configuration to get a successful build due
-to limitations of the POSIX Makefiles CMake generates. To build with CMake,
-change to the folder containing CMakeLists.txt and run:
+other combinations should work. To build with CMake, change to the folder
+containing CMakeLists.txt and run:
 
     mkdir build
     cd build
@@ -2451,6 +2450,10 @@ Or to build with your system default generator:
     cd build
     cmake ..
     cmake --build .
+
+If you're building the example you should have an executable to run:
+
+    ./Vour
 
 The package sets the CMake variables verilator_FOUND, VERILATOR_ROOT and
 VERILATOR_BIN to the appropriate values, and also creates a verilate()
@@ -2465,6 +2468,9 @@ Verilator and add the generated C++ sources to the target specified.
 Lowercase and ... should be replaced with arguments, the uppercase parts
 delimit the arguments and can be passed in any order, or left out entirely
 if optional.
+
+verilate(target ...) can be called multiple times to add other verilog
+modules to an executable or library target.
 
 When generating Verilated SystemC sources, you should also include the
 SystemC include directories and link to the SystemC libraries.

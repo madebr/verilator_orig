@@ -1008,7 +1008,6 @@ sub compile {
             mkdir $self->{obj_dir};
             my @csources = ();
             unshift @csources, $self->{main_filename} if $param{make_main};
-            unlink "$self->{obj_dir}/CMakeCache.txt";
             $self->_run(logfile => "$self->{obj_dir}/vlt_cmake.log",
                         fails => $param{fails},
                         tee => $param{tee},
@@ -1321,11 +1320,13 @@ sub have_cmake {
 
 sub cmake_version {
     chomp(my $cmake_bin = `which cmake`);
-    if (!defined $cmake_bin) {
-        return;
+    if (!$cmake_bin) {
+        return undef;
     }
-    my $cmake_version = `$cmake_bin --version`;
-    $cmake_version =~ /cmake version (\d+)\.(\d+)/;
+    my $cmake_version = `cmake --version`;
+    if ($cmake_version !~ /cmake version (\d+)\.(\d+)/) {
+        return undef;
+    }
     $cmake_version = "$1.$2";
     return version->declare($cmake_version);
 }
