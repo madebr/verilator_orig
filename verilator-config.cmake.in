@@ -289,9 +289,6 @@ function(verilate TARGET)
     ${${VERILATE_PREFIX}_USER_LDLIBS}
     "$<$<BOOL:$<TARGET_PROPERTY:VERILATOR_THREADED>>:${VERILATOR_MT_CFLAGS}>"
   )
-  target_compile_features(${TARGET} PRIVATE
-    $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_THREADED>>:cxx_std_11>
-  )
 endfunction()
 
 function(_verilator_find_systemc)
@@ -351,8 +348,6 @@ function(_verilator_find_systemc)
       set_target_properties(Verilator::systemc
         PROPERTIES
           INTERFACE_LINK_LIBRARIES "SystemC::systemc")
-        set(VERILATOR_SYSTEMC_CXX_STANDARD "${SystemC_CXX_STANDARD}" CACHE STRING "SystemC C++ standard")
-        set(VERILATOR_SYSTEMC_CXX_STANDARD_REQUIRED "${SystemC_CXX_STANDARD_REQUIRED}" CACHE STRING "SystemC C++ standard")
       return()
     endif()
 
@@ -370,14 +365,6 @@ function(verilator_link_systemc TARGET)
   target_link_libraries("${TARGET}" PUBLIC Verilator::systemc)
   if(VERILATOR_SYSTEMC_CXX_FLAGS)
     set_property(TARGET "${TARGET}" APPEND PROPERTY COMPILE_OPTIONS ${VERILATOR_SYSTEMC_CXX_FLAGS})
-  endif()
-  if(VERILATOR_SYSTEMC_CXX_STANDARD)
-    set_target_properties("${TARGET}" PROPERTIES
-      CXX_STANDARD "${VERILATOR_SYSTEMC_CXX_STANDARD}")
-  endif()
-  if(VERILATOR_SYSTEMC_CXX_STANDARD_REQUIRED)
-    set_target_properties("${TARGET}" PROPERTIES
-      CXX_STANDARD_REQUIRED "${VERILATOR_SYSTEMC_CXX_STANDARD_REQUIRED}")
   endif()
 endfunction()
 

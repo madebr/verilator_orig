@@ -1025,7 +1025,6 @@ sub compile {
                                 "-DCMAKE_PREFIX_PATH=\"".(($ENV{SYSTEMC_INCLUDE}||$ENV{SYSTEMC}||'')."/..\""),
                                 "-DTEST_OPT_FAST=\"" . ($param{benchmark}?"-O2":"") . "\"",
                                 "-DTEST_VERILATION=\"" . $::Opt_Verilation . "\"",
-                                ($self->{verbose} ? "--verbose" : ""),
                         ]);
             return 1 if $self->errors || $self->skips || $self->unsupporteds;
         }
@@ -1051,7 +1050,9 @@ sub compile {
         if (!$param{fails} && $param{verilator_make_cmake}) {
             $self->oprint("Running cmake --build\n") if $self->{verbose};
             $self->_run(logfile => "$self->{obj_dir}/vlt_cmake_build.log",
-                        cmd => ["cmake", "--build", $self->{obj_dir},
+                        cmd => ["cmake",
+                                "--build", $self->{obj_dir},
+                                ($self->{verbose}?"--verbose":""),
                         ]);
         }
     }
