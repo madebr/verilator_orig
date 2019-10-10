@@ -280,7 +280,6 @@ function(verilate TARGET)
   target_compile_definitions(${TARGET} PRIVATE
     VM_COVERAGE=$<BOOL:$<TARGET_PROPERTY:VERILATOR_COVERAGE>>
     VM_SC=$<BOOL:$<TARGET_PROPERTY:VERILATOR_SYSTEMC>>
-    $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_SYSTEMC>>:SC_CPLUSPLUS=201402L>
     $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_THREADED>>:VL_THREADED>
     VM_TRACE_VCD=$<BOOL:$<TARGET_PROPERTY:VERILATOR_TRACE_VCD>>
     VM_TRACE_FST=$<BOOL:$<TARGET_PROPERTY:VERILATOR_TRACE_FST>>
@@ -292,7 +291,6 @@ function(verilate TARGET)
   )
   target_compile_features(${TARGET} PRIVATE
     $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_THREADED>>:cxx_std_11>
-    $<$<BOOL:$<TARGET_PROPERTY:VERILATOR_SYSTEMC>>:cxx_std_14>
   )
 endfunction()
 
@@ -337,6 +335,15 @@ function(_verilator_find_systemc)
         PROPERTIES
           INTERFACE_INCLUDE_DIRECTORIES "${SYSTEMC_INCLUDEDIR}"
           INTERFACE_LINK_LIBRARIES "${SYSTEMC_LIBRARY}")
+      if ("$ENV{SYSTEMC_CPPSTD}")
+        set(SYSTEMC_CPPSTD "$ENV{SYSTEMC_CPPSTD}")
+      endif()
+      if (SYSTEMC_CPPSTD)
+        set(VERILATOR_SYSTEMC_CXX_STANDARD "${SYSTEMC_CPPSTD}" CACHE STRING "SystemC C++ standard")
+        set(VERILATOR_SYSTEMC_CXX_STANDARD_REQUIRED ON CACHE STRING "SystemC C++ standard")
+      else()
+        message(WARNING "SYSTEMC_CPPSTD (environment) variable not set (SystemC C++ standard)")
+      endif()
       return()
     endif()
 
@@ -345,7 +352,11 @@ function(_verilator_find_systemc)
       add_library(Verilator::systemc INTERFACE IMPORTED)
       set_target_properties(Verilator::systemc
         PROPERTIES
-          INTERFACE_LINK_LIBRARIES "SystemC::systemc")
+          INTERFACE_LINK_LIBRARIES "SystemC::systemc"
+          CXX_STANDARD "${SystemC_CXX_STANDARD}"
+          CXX_STANDARD_REQUIRED "${SystemC_CXX_STANDARD_REQUIRED}")
+        set(VERILATOR_SYSTEMC_CXX_STANDARD "${SystemC_CXX_STANDARD}" CACHE STRING "SystemC C++ standard")
+        set(VERILATOR_SYSTEMC_CXX_STANDARD_REQUIRED "${SystemC_CXX_STANDARD_REQUIRED}" CACHE STRING "SystemC C++ standard")
       return()
     endif()
 
@@ -361,6 +372,14 @@ endfunction()
 function(verilator_link_systemc TARGET)
   _verilator_find_systemc()
   target_link_libraries("${TARGET}" PUBLIC Verilator::systemc)
+  if(VERILATOR_SYSTEMC_CXX_STANDARD)
+    set_target_properties("${TARGET}" PROPERTIES
+      CXX_STANDARD "${VERILATOR_SYSTEMC_CXX_STANDARD}")
+  endif()
+  if(VERILATOR_SYSTEMC_CXX_STANDARD_REQUIRED)
+    set_target_properties("${TARGET}" PROPERTIES
+      CXX_STANDARD_REQUIRED "${VERILATOR_SYSTEMC_CXX_STANDARD_REQUIRED}")
+  endif()
 endfunction()
 
 function(verilator_generate_key OUTPUT_VARIABLE)
