@@ -2044,7 +2044,7 @@ was compiled).
 =item SYSTEMC_CXX_FLAGS
 
 Specifies additional flags that are required to be passed to GCC when
-building the SystemC model.  System 2.3.0 may need this set to "-pthread".
+building the SystemC model.  SystemC 2.3.0 may need this set to "-pthread".
 
 =item SYSTEMC_INCLUDE
 
@@ -2499,7 +2499,8 @@ installation can be found by CMake. This can be configured by setting the
 CMAKE_PREFIX_PATH variable during CMake configuration.
 
 Don't forget to set the same C++ standard for the Verilated sources as the
-SystemC library.
+SystemC library. This can be specified by using the SYSTEMC_CXX_FLAGS
+variable.
 
 =over 4
 
