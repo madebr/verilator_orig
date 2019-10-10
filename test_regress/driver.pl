@@ -1020,7 +1020,7 @@ sub compile {
                                 "-DTEST_CSOURCES=\"@csources\"",
                                 "-DTEST_VERILATOR_ARGS=\"@vlt_args\"",
                                 "-DTEST_VERILATOR_SOURCES=\"$param{top_filename} @{$param{v_other_filenames}}\"",
-                                "-DTEST_VERBOSE=\"".($opt_verbose ? 1 : 0)."\"",
+                                "-DTEST_VERBOSE=\"".($self->{verbose} ? 1 : 0)."\"",
                                 "-DTEST_SYSTEMC=\"" .($self->sc ? 1 : 0). "\"",
                                 "-DCMAKE_PREFIX_PATH=\"".(($ENV{SYSTEMC_INCLUDE}||$ENV{SYSTEMC}||'')."/..\""),
                                 "-DTEST_OPT_FAST=\"" . ($param{benchmark}?"-O2":"") . "\"",

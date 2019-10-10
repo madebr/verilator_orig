@@ -165,7 +165,7 @@ function(verilate TARGET)
   set(VDIR "${BINARY_DIR}/CMakeFiles/${TARGET_NAME}.dir/${VERILATE_PREFIX}.dir")
   file(MAKE_DIRECTORY ${VDIR})
 
-  set(VERILATOR_COMMAND "${VERILATOR_BIN}" -Wall -Wno-fatal --compiler ${COMPILER}
+  set(VERILATOR_COMMAND "${VERILATOR_BIN}" --compiler ${COMPILER}
                         --prefix ${VERILATE_PREFIX} --Mdir ${VDIR} --make cmake
                         ${VERILATOR_ARGS} ${VERILATE_VERILATOR_ARGS}
                         ${VERILATE_SOURCES})
