@@ -582,8 +582,8 @@ sub new {
                             "--comp-limit-members 10", ],
         verilator_flags2 => [],
         verilator_flags3 => ["--clk clk"],
-        verilator_make_gmake => 1,
-        verilator_make_cmake => 0,
+        verilator_make_gmake => 0,
+        verilator_make_cmake => 1,
         verilated_debug => $Opt_Verilated_Debug,
         stdout_filename => undef,  # Redirect stdout
         %$self};
